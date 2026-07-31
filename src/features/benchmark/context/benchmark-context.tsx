@@ -1,8 +1,11 @@
-import React, { createContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useState, useCallback, useMemo, useRef } from 'react';
 import type { BenchmarkSession } from '../engine/types';
 import { runBenchmarkSession } from '../engine/benchmark-runner';
 import type { DatasetConfig } from '../../dataset';
 import { generateDataset } from '../../dataset';
+import { HistoryService } from '../../history/services/history-service';
+import { LocalStorageAdapter } from '../../history/storage/local-storage-adapter';
+import { SessionRepository } from '../../history/storage/session-repository';
 
 interface BenchmarkContextType {
   selectedAlgorithms: string[];
@@ -41,6 +44,14 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [warmupIterations, setWarmupIterations] = useState<number>(1);
 
+  // Lazily initialise the history service for auto-save
+  const historyServiceRef = useRef<HistoryService | null>(null);
+  if (!historyServiceRef.current) {
+    historyServiceRef.current = new HistoryService(
+      new SessionRepository(new LocalStorageAdapter()),
+    );
+  }
+
   const runCurrentBenchmark = useCallback(async (): Promise<BenchmarkSession | null> => {
     if (selectedAlgorithms.length === 0 || dataset.length === 0) return null;
 
@@ -57,6 +68,14 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       });
 
       setCurrentSession(session);
+
+      // ── Auto-save to history ──────────────────────────────────────────
+      try {
+        historyServiceRef.current?.saveSession(session);
+      } catch (e) {
+        console.warn('[BenchmarkContext] Failed to auto-save session to history:', e);
+      }
+
       return session;
     } catch (error) {
       console.error('Benchmark run failed:', error);
