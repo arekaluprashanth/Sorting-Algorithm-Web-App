@@ -3,11 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sorting-benchmark</title>
+    <meta name="theme-color" content="#0a0a0c" />
+    <meta name="description" content="Professional Web Application for benchmarking, visualizing, and analyzing sorting algorithms up to 1,000,000 elements." />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sorting-algorithm-web-app.vercel.app/" />
+    <meta property="og:title" content="SortBench — Sorting Algorithm Benchmark & Analytics Studio" />
+    <meta property="og:description" content="Benchmark sorting algorithms in parallel Web Workers, analyze microsecond execution metrics, and explore interactive Big-O complexity visualizations." />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="SortBench — Sorting Algorithm Benchmark Studio" />
+    <meta property="twitter:description" content="Benchmark sorting algorithms in Web Workers up to 1,000,000 elements." />
+
+    <title>SortBench — Sorting Algorithm Benchmark & Analytics Studio</title>
   </head>
-  <body>
+  <body class="bg-[#0a0a0c] text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(err => {
+            console.log('SW registration failed:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

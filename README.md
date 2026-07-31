@@ -1,94 +1,101 @@
-# Sorting Algorithm Benchmark Web App
+# SortBench — Sorting Algorithm Benchmark & Analytics Studio
 
-## Description
-A professional-grade, scalable web application designed to visually demonstrate, execute, and benchmark various sorting algorithms. The application strictly separates UI from business logic, ensuring high-performance benchmark execution with accurate performance metrics, dataset validation, and future integration with Web Workers.
+![CI Pipeline](https://github.com/arekaluprashanth/Sorting-Algorithm-Web-App/actions/workflows/ci.yml/badge.svg)
+![Version](https://img.shields.io/badge/version-1.0.0--RC-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue)
 
-## Features
-- **Algorithm Engine**: Modular, extensible architecture supporting Bubble, Selection, Insertion, Merge, Quick, Heap, Shell, Counting, and Radix Sort.
-- **Precision Metrics**: Tracking elapsed time, comparisons, swaps, read/writes, iterations, and recursive depth.
-- **Dataset Generation**: Built-in seeded generators for diverse datasets (sorted, reverse, random, duplicated, nearly-sorted).
-- **Benchmark Orchestration**: UI-independent scheduling, warm-up runs, and metric aggregation.
-- **Strict Validations**: Complete immutability guarantees and deep validation for algorithm prerequisites.
+A production-grade, high-performance web application designed to benchmark, visualize, and analyze sorting algorithms up to **1,000,000 elements** in real time without blocking the UI thread.
+
+---
+
+## Key Features
+
+- ⚡ **Web Worker Benchmark Engine**: Multi-threaded, non-blocking execution keeping the UI at a responsive 60 FPS.
+- 📊 **Analytics Dashboard**: Interactive charts, operations/sec throughput, CPU timing, and memory footprint estimations.
+- 🎓 **Interactive Learning Center**: Step-by-step sorting visualizer powered by `framer-motion` and live pseudocode highlights.
+- 💾 **Session History Management**: Persist, compare side-by-side, filter, tag, and export benchmark sessions.
+- 📄 **Export Suite**: Export session reports to CSV, JSON, PDF (with chart canvas snapshots), and printable HTML reports.
+- 📱 **Progressive Web App (PWA)**: Offline execution shell and installable web app manifest.
+
+---
+
+## Supported Sorting Algorithms
+
+1. **Quick Sort** (O(N log N))
+2. **Merge Sort** (O(N log N) - Stable)
+3. **Heap Sort** (O(N log N) - In-place)
+4. **Tim Sort** (O(N log N) - Hybrid Stable)
+5. **Bubble Sort** (O(N²))
+6. **Selection Sort** (O(N²))
+7. **Insertion Sort** (O(N²))
+8. **Shell Sort** (O(N^1.5))
+9. **Radix Sort** (O(N · k))
+10. **Counting Sort** (O(N + K))
+
+---
 
 ## Tech Stack
-- **Framework**: React 19, Vite
-- **Language**: TypeScript (Strict Mode)
-- **Styling**: TailwindCSS, shadcn/ui (Planned)
-- **Routing**: React Router
-- **Animations**: Framer Motion
-- **Charts**: Recharts
-- **Icons**: Lucide React
-- **Data Fetching & State**: TanStack Query
-- **Forms**: React Hook Form, Zod
 
-## Folder Structure
-```text
-src/
-├── app/             # Application entry and global routing
-├── assets/          # Static assets (images, global css)
-├── components/      # Reusable generic UI components
-├── benchmark/       # Core benchmark engine, metrics, and workers
-├── features/        # Feature modules (algorithms, datasets)
-├── hooks/           # Global React hooks
-├── providers/       # Context/Global providers
-├── constants/       # Global constants
-├── utils/           # Helper functions
-├── config/          # Configurations
-├── services/        # External services / APIs
-├── pages/           # Route-level page components
-├── layouts/         # Layout wrappers
-├── styles/          # Tailwind and CSS styles
-├── types/           # Global TypeScript definitions
-├── data/            # Mock/static data
-└── lib/             # Third-party library integrations
-```
+- **Core**: React 19, TypeScript 6, Vite 8, React Router v7
+- **Styling**: TailwindCSS v4, Lucide Icons, Framer Motion
+- **Testing**: Vitest, React Testing Library, jsdom
+- **Exporting**: jsPDF, html2canvas
 
-## Installation
-1. Ensure you have Node.js and `npm` installed.
-2. Clone the repository and navigate into the folder:
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js >= 18
+- npm >= 9
+
+### Installation
 ```bash
+# Clone the repository
+git clone https://github.com/arekaluprashanth/Sorting-Algorithm-Web-App.git
 cd "Sorting Algorithm Web App"
-```
-3. Install dependencies:
-```bash
-npm install
-```
 
-## Run Project
-Start the Vite development server:
-```bash
+# Install dependencies
+npm install
+
+# Start local development server
 npm run dev
 ```
 
-## Build Project
-Compile TypeScript and bundle for production:
+---
+
+## Development & Quality Assurance
+
+```bash
+# Run unit & integration tests
+npm test
+
+# Generate test coverage report
+npm run test:coverage
+
+# Lint codebase
+npm run lint
+
+# Build production bundle
+npm run build
+```
+
+---
+
+## Deployment
+
+Deployable to Vercel, Netlify, or any static web host:
+
 ```bash
 npm run build
 ```
-To preview the built app locally:
-```bash
-npm run preview
-```
+Output static bundle will be generated in `dist/`.
 
-## Deployment
-The project is structurally prepared for Vercel deployment out-of-the-box.
-1. Push your code to GitHub.
-2. Import the repository in your Vercel dashboard.
-3. Ensure Environment Variables (if any) are configured in Vercel.
-No hardcoded localhost values exist; the configuration ensures robust deployment.
+---
 
-## Future Roadmap
-- Implementation of comprehensive visualization charts.
-- Offloading the benchmark execution entirely to background Web Workers.
-- Exporting generated reports and metrics.
-- Addition of analytics tracking.
+## Contributing & License
 
-## License
-MIT License
+Contributions are welcome! Please review [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
-## Contribution Guide
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/your-feature-name`.
-3. Commit changes: `git commit -m "Add some feature"`.
-4. Push the branch: `git push origin feature/your-feature-name`.
-5. Open a Pull Request.
+Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sorting-algorithm-web-app.vercel.app/sitemap.xml

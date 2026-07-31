@@ -1,0 +1,17 @@
+{
+  "short_name": "SortBench",
+  "name": "Sorting Algorithm Benchmark & Analytics Studio",
+  "description": "Professional Web Application for benchmarking, visualizing, and analyzing sorting algorithms up to 1,000,000 elements.",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
+  "display": "standalone",
+  "orientation": "any"
+}
