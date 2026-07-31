@@ -15,6 +15,14 @@ const HistoryPage = lazy(() =>
   import('../pages/HistoryPage').then((m) => ({ default: m.HistoryPage }))
 );
 
+const LearningDashboardPage = lazy(() =>
+  import('../pages/LearningDashboardPage').then((m) => ({ default: m.LearningDashboardPage }))
+);
+
+const AlgorithmDetailPage = lazy(() =>
+  import('../pages/AlgorithmDetailPage').then((m) => ({ default: m.AlgorithmDetailPage }))
+);
+
 const AlgorithmsPage = lazy(() =>
   import('../pages/AlgorithmsPage').then((m) => ({ default: m.AlgorithmsPage }))
 );
@@ -81,6 +89,22 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingState type="full" label="Loading Complexity Explorer..." />}>
             <ComplexityPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'learning',
+        element: (
+          <Suspense fallback={<LoadingState type="full" label="Loading Learning Center..." />}>
+            <LearningDashboardPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'learning/:id',
+        element: (
+          <Suspense fallback={<LoadingState type="full" label="Loading Algorithm details..." />}>
+            <AlgorithmDetailPage />
           </Suspense>
         ),
       },

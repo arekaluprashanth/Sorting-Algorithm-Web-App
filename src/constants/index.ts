@@ -57,6 +57,7 @@ export const ROUTES = {
   BENCHMARK: '/benchmark',
   ALGORITHMS: '/algorithms',
   COMPLEXITY: '/complexity',
+  LEARNING: '/learning',
   HISTORY: '/history',
   REPORTS: '/reports',
   SETTINGS: '/settings',
@@ -92,6 +93,13 @@ export const NAV_ITEMS: NavItem[] = [
     path: ROUTES.COMPLEXITY,
     iconName: 'BookOpen',
     description: 'Big-O theoretical and empirical algorithm analysis',
+  },
+  {
+    id: 'learning',
+    label: 'Learning Center',
+    path: ROUTES.LEARNING,
+    iconName: 'GraduationCap',
+    description: 'Interactive visualization and algorithm study guide',
   },
   {
     id: 'history',
