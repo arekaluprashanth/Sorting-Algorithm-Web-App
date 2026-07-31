@@ -30,7 +30,7 @@ export const ExecutionTimeDashboard: React.FC<ExecutionTimeDashboardProps> = ({ 
           <CardHeader>
             <CardTitle>Total Execution Time Comparison</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent id="chart-execution-time">
             <BarChart 
               data={chartData.executionTimeData} 
               xAxisKey="name" 
@@ -46,7 +46,7 @@ export const ExecutionTimeDashboard: React.FC<ExecutionTimeDashboardProps> = ({ 
           <CardHeader>
             <CardTitle>Execution Time Over Iterations</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent id="chart-timeline">
             {chartData.timelineData.length > 0 ? (
               <LineChart 
                 data={chartData.timelineData} 

@@ -43,7 +43,7 @@ export const OperationsDashboard: React.FC<OperationsDashboardProps> = ({ chartD
           <CardHeader>
             <CardTitle>Comparisons vs Swaps</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent id="chart-operations">
             <BarChart 
               data={chartData.operationsData} 
               xAxisKey="name" 
@@ -59,7 +59,7 @@ export const OperationsDashboard: React.FC<OperationsDashboardProps> = ({ chartD
           <CardHeader>
             <CardTitle>Multi-dimensional Analysis (Normalized)</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent id="chart-radar">
              <RadarChart 
                 data={pivotedRadarData} 
                 polarKey="metric" 
