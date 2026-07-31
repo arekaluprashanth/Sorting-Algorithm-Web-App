@@ -3,7 +3,7 @@ import { ThemeProvider } from '../context/ThemeContext';
 import { ToastProvider } from '../components/ui/Toast';
 import { QueryProvider } from './QueryProvider';
 import { AuthProvider } from './AuthProvider';
-import { BenchmarkProvider } from './BenchmarkProvider';
+import { BenchmarkProvider } from '../features/benchmark';
 import { HistoryProvider } from '../features/history/context';
 
 export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
