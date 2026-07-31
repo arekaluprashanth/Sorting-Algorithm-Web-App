@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Moon, Globe } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { ThemeSwitch } from '../components/layout/ThemeSwitch';
-import { Badge } from '../components/ui/Badge';
 import { siteConfig } from '../config/site.config';
 
 export const SettingsPage: React.FC = () => {
@@ -18,7 +17,6 @@ export const SettingsPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl font-bold text-white tracking-tight">System Settings</h1>
-            <Badge variant="info">Phase 1 Foundation</Badge>
           </div>
           <p className="text-xs text-neutral-400">
             Customize application theme preferences and environment variables

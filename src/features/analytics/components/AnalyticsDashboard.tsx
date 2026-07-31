@@ -30,7 +30,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ session 
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-white tracking-tight">Analytics & Visualization Dashboard</h2>
         <p className="text-sm text-neutral-400">
-          Comprehensive breakdown of algorithm performance on {session.config.datasetSize.toLocaleString()} elements.
+          Comprehensive breakdown of algorithm performance on {session.config.datasetSizes.length > 1 ? 'multiple' : (session.config.datasetSizes[0] ?? 0).toLocaleString()} elements.
         </p>
       </div>
 

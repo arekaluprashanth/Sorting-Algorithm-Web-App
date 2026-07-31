@@ -10,7 +10,7 @@ interface ComparisonTableProps {
   results: BenchmarkResult[];
 }
 
-type SortKey = 'algorithmName' | 'executionTimeMs' | 'comparisons' | 'swaps' | 'memoryEstimateBytes' | 'maxRecursionDepth';
+type SortKey = 'algorithmName' | 'datasetSize' | 'executionTimeMs' | 'comparisons' | 'swaps' | 'memoryEstimateBytes' | 'maxRecursionDepth';
 
 type SortConfig = {
   key: SortKey;
@@ -75,6 +75,9 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ results }) => 
               <th className="py-3 px-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('algorithmName')}>
                 <div className="flex items-center gap-2">Algorithm <ArrowUpDown className="w-3 h-3" /></div>
               </th>
+              <th className="py-3 px-4 cursor-pointer hover:text-white transition-colors text-right" onClick={() => handleSort('datasetSize')}>
+                <div className="flex items-center justify-end gap-2">Size (n) <ArrowUpDown className="w-3 h-3" /></div>
+              </th>
               <th className="py-3 px-4 cursor-pointer hover:text-white transition-colors text-right" onClick={() => handleSort('executionTimeMs')}>
                 <div className="flex items-center justify-end gap-2">Time (ms) <ArrowUpDown className="w-3 h-3" /></div>
               </th>
@@ -94,7 +97,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ results }) => 
             {processedData.length > 0 ? (
               processedData.map((res, idx) => (
                 <motion.tr 
-                  key={res.algorithmId} 
+                  key={`${res.algorithmId}-${res.datasetSize}`} 
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
@@ -103,6 +106,9 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ results }) => 
                   <td className="py-3 px-4 font-semibold text-white flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: `var(--color-${res.algorithmId.toLowerCase()})` }} />
                     {res.algorithmName}
+                  </td>
+                  <td className="py-3 px-4 text-right font-mono text-neutral-300">
+                    {formatNumber(res.datasetSize)}
                   </td>
                   <td className="py-3 px-4 text-right font-mono text-blue-400 font-bold">
                     {formatDuration(res.executionTimeMs)}
@@ -127,7 +133,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ results }) => 
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-neutral-500 text-sm">
+                <td colSpan={7} className="py-8 text-center text-neutral-500 text-sm">
                   No algorithms match your search.
                 </td>
               </tr>

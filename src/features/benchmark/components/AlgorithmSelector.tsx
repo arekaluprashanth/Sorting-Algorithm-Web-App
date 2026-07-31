@@ -68,7 +68,7 @@ export const AlgorithmSelector: React.FC<AlgorithmSelectorProps> = ({ selectedId
           onClick={toggleSelectAll}
           className="text-blue-400 hover:underline cursor-pointer"
         >
-          {selectedIds.length === filteredAlgorithms.length ? 'Deselect All' : 'Select Filtered All'}
+          {selectedIds.length === filteredAlgorithms.length ? 'Clear All' : 'Select All'}
         </button>
       </div>
 

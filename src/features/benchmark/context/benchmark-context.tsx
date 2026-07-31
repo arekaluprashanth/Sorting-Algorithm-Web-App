@@ -14,6 +14,8 @@ interface BenchmarkContextType {
   setSelectedAlgorithms: React.Dispatch<React.SetStateAction<string[]>>;
   datasetConfig: DatasetConfig;
   setDatasetConfig: React.Dispatch<React.SetStateAction<DatasetConfig>>;
+  datasetSizes: number[];
+  setDatasetSizes: React.Dispatch<React.SetStateAction<number[]>>;
   dataset: number[];
   setDataset: React.Dispatch<React.SetStateAction<number[]>>;
   currentSession: BenchmarkSession | null;
@@ -43,6 +45,7 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     'tim-sort',
   ]);
   const [datasetConfig, setDatasetConfig] = useState<DatasetConfig>(DEFAULT_DATASET_CONFIG);
+  const [datasetSizes, setDatasetSizes] = useState<number[]>([1000]);
   const [dataset, setDataset] = useState<number[]>(() => generateDataset(DEFAULT_DATASET_CONFIG));
   const [currentSession, setCurrentSession] = useState<BenchmarkSession | null>(null);
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -82,7 +85,7 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const runCurrentBenchmark = useCallback(async (): Promise<BenchmarkSession | null> => {
-    if (selectedAlgorithms.length === 0 || dataset.length === 0) return null;
+    if (selectedAlgorithms.length === 0 || datasetSizes.length === 0) return null;
 
     setIsRunning(true);
     setProgress(null);
@@ -90,8 +93,9 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const startedAt = Date.now();
     const config = {
       algorithmIds: selectedAlgorithms,
-      dataset,
+      datasetSizes,
       datasetType: datasetConfig.type,
+      datasetOptions: datasetConfig,
       warmupIterations,
     };
 
@@ -108,10 +112,7 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               id: `bench-${Date.now().toString(36)}`,
               results,
               config: {
-                algorithmIds: selectedAlgorithms,
-                datasetType: datasetConfig.type,
-                warmupIterations,
-                datasetSize: dataset.length,
+                ...config,
               },
               startedAt,
               completedAt,
@@ -164,7 +165,7 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setIsRunning(false);
     }
-  }, [selectedAlgorithms, dataset, datasetConfig.type, warmupIterations]);
+  }, [selectedAlgorithms, datasetSizes, datasetConfig, warmupIterations]);
 
   const clearSession = useCallback(() => {
     setCurrentSession(null);
@@ -176,6 +177,8 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setSelectedAlgorithms,
       datasetConfig,
       setDatasetConfig,
+      datasetSizes,
+      setDatasetSizes,
       dataset,
       setDataset,
       currentSession,
@@ -190,6 +193,7 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [
       selectedAlgorithms,
       datasetConfig,
+      datasetSizes,
       dataset,
       currentSession,
       isRunning,

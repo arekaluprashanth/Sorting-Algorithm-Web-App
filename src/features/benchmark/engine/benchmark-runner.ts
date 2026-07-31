@@ -9,6 +9,7 @@
 import type { BenchmarkConfig, BenchmarkResult, BenchmarkSession } from './types';
 import { getAlgorithm } from './algorithms';
 import { createMetricsCollector } from './metrics-collector';
+import { DatasetGenerator } from '../../dataset/generators';
 
 /** Bytes per number element (Float64 in JS). */
 const BYTES_PER_ELEMENT = 8;
@@ -96,27 +97,34 @@ function runSingleBenchmark(
 export function runBenchmarkSession(config: BenchmarkConfig): BenchmarkSession {
   const sessionId = generateSessionId();
   const startedAt = Date.now();
+  const results: BenchmarkResult[] = [];
 
-  const results: BenchmarkResult[] = config.algorithmIds.map((algorithmId) =>
-    runSingleBenchmark(
-      algorithmId,
-      config.dataset,
-      config.datasetType,
-      config.warmupIterations,
-    ),
-  );
+  for (const size of config.datasetSizes) {
+    const datasetOpts = {
+      ...(config.datasetOptions || {}),
+      type: config.datasetType as any,
+      size,
+    };
+    const dataset = DatasetGenerator.generate(datasetOpts).data;
+
+    for (const algorithmId of config.algorithmIds) {
+      results.push(
+        runSingleBenchmark(
+          algorithmId,
+          dataset,
+          config.datasetType,
+          config.warmupIterations,
+        )
+      );
+    }
+  }
 
   const completedAt = Date.now();
 
   return {
     id: sessionId,
     results,
-    config: {
-      algorithmIds: config.algorithmIds,
-      datasetType: config.datasetType,
-      warmupIterations: config.warmupIterations,
-      datasetSize: config.dataset.length,
-    },
+    config,
     startedAt,
     completedAt,
   };

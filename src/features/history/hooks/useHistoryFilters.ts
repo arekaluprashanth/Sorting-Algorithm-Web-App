@@ -22,7 +22,7 @@ function applyFilters(sessions: HistorySession[], filter: HistoryFilter): Histor
 
     // Size range filter
     if (filter.sizeRange) {
-      const size = h.session.config.datasetSize;
+      const size = Math.max(...h.session.config.datasetSizes);
       if (size < filter.sizeRange[0] || size > filter.sizeRange[1]) return false;
     }
 
@@ -52,7 +52,7 @@ function applySort(sessions: HistorySession[], sort: HistorySort): HistorySessio
         cmp = a.name.localeCompare(b.name);
         break;
       case 'datasetSize':
-        cmp = a.session.config.datasetSize - b.session.config.datasetSize;
+        cmp = Math.max(...a.session.config.datasetSizes) - Math.max(...b.session.config.datasetSizes);
         break;
       case 'executionTime': {
         const avgA = a.session.results.reduce((s, r) => s + r.executionTimeMs, 0) / (a.session.results.length || 1);

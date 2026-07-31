@@ -11,7 +11,6 @@ import {
   History,
   Lightbulb,
   CheckCircle2,
-  Rocket,
   ShieldCheck,
   Zap,
 } from 'lucide-react';
@@ -68,9 +67,9 @@ export const DashboardPage: React.FC = () => {
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatisticCard
-            title="Architecture Status"
-            value="Phase 2"
-            subtitle="Core Design Infrastructure"
+            title="System Status"
+            value="Production"
+            subtitle="High-Performance Engine"
             icon={ShieldCheck}
             trend="Active"
           />
@@ -95,9 +94,9 @@ export const DashboardPage: React.FC = () => {
           />
         </div>
 
-        {/* Two Column Layout: Algorithms Overview & Recent Activity Placeholder */}
+        {/* Two Column Layout: Algorithms Overview & Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Algorithms Overview Catalog Placeholder */}
+          {/* Algorithms Overview Catalog */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex justify-between items-center">
               <div>
@@ -145,11 +144,10 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Recent Activity Placeholder (Professional Empty State) */}
+          {/* Recent Activity */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-white tracking-tight">Recent Benchmark Runs</h3>
-              <Badge variant="default">Phase 2 Shell</Badge>
             </div>
 
             <EmptyState
@@ -160,8 +158,8 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Performance Tips & Upcoming Features Roadmap */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Performance Tips */}
+        <div className="grid grid-cols-1 gap-6">
           {/* Performance & Optimization Tips */}
           <Card>
             <CardHeader>
@@ -183,31 +181,6 @@ export const DashboardPage: React.FC = () => {
               <div className="flex items-start gap-2 p-2.5 rounded bg-black/30 border border-white/10">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <span>Test reversed & nearly-sorted distributions to evaluate best vs worst-case behaviors.</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Project Information & Upcoming Features Roadmap */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Rocket className="w-5 h-5 text-blue-400" />
-                <CardTitle>Upcoming Phase Roadmap</CardTitle>
-              </div>
-              <CardDescription>Features scheduled for subsequent phases</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-neutral-300 font-mono">
-              <div className="flex justify-between items-center p-2.5 rounded bg-black/30 border border-white/10">
-                <span>Phase 3: Interactive Sorting Engine & Dataset Controls</span>
-                <Badge variant="info">Next</Badge>
-              </div>
-              <div className="flex justify-between items-center p-2.5 rounded bg-black/30 border border-white/10">
-                <span>Phase 4: Recharts Visual Charts & Comparative Curves</span>
-                <Badge variant="default">Scheduled</Badge>
-              </div>
-              <div className="flex justify-between items-center p-2.5 rounded bg-black/30 border border-white/10">
-                <span>Phase 5: Reports Export (CSV, JSON, PDF) & Persistent Storage</span>
-                <Badge variant="default">Scheduled</Badge>
               </div>
             </CardContent>
           </Card>

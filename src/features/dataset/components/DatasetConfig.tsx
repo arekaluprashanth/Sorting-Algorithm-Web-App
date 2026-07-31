@@ -6,7 +6,7 @@ import { DatasetPreview } from './DatasetPreview';
 import { generateDataset } from '../generators';
 
 interface DatasetConfigProps {
-  onDatasetGenerated: (dataset: number[], config: DatasetConfig) => void;
+  onDatasetGenerated: (dataset: number[], config: DatasetConfig, datasetSizes: number[]) => void;
 }
 
 const ICON_MAP = {
@@ -17,20 +17,45 @@ const ICON_MAP = {
 };
 
 export const DatasetConfigComponent: React.FC<DatasetConfigProps> = ({ onDatasetGenerated }) => {
+  const [sizeMode, setSizeMode] = useState<'single' | 'multiple' | 'range'>('single');
   const [size, setSize] = useState<number>(1000);
+  const [multipleSizesText, setMultipleSizesText] = useState<string>('1000, 5000, 10000');
+  const [rangeStart, setRangeStart] = useState<number>(1000);
+  const [rangeEnd, setRangeEnd] = useState<number>(10000);
+  const [rangeStep, setRangeStep] = useState<number>(1000);
+
   const [type, setType] = useState<DatasetType>('random');
   const [min, setMin] = useState<number>(1);
   const [max, setMax] = useState<number>(10000);
   const [seed, setSeed] = useState<number | undefined>(12345);
   const [useSeed, setUseSeed] = useState<boolean>(false);
+  
   const [previewData, setPreviewData] = useState<number[]>(() =>
     generateDataset({ size: 1000, type: 'random', min: 1, max: 10000, seed: 12345 })
   );
 
   const handleGenerate = () => {
     try {
+      let datasetSizes: number[] = [];
+      if (sizeMode === 'single') {
+        datasetSizes = [size];
+      } else if (sizeMode === 'multiple') {
+        datasetSizes = multipleSizesText
+          .split(',')
+          .map((s) => parseInt(s.trim(), 10))
+          .filter((s) => !isNaN(s) && s > 0);
+        if (datasetSizes.length === 0) datasetSizes = [1000];
+      } else if (sizeMode === 'range') {
+        for (let s = rangeStart; s <= rangeEnd; s += rangeStep) {
+          datasetSizes.push(s);
+        }
+        if (datasetSizes.length === 0) datasetSizes = [1000];
+      }
+
+      const previewSize = datasetSizes[0] || 1000;
+
       const config: DatasetConfig = {
-        size,
+        size: previewSize, // Used just for the preview in the config type
         type,
         min,
         max,
@@ -39,7 +64,7 @@ export const DatasetConfigComponent: React.FC<DatasetConfigProps> = ({ onDataset
 
       const data = generateDataset(config);
       setPreviewData(data);
-      onDatasetGenerated(data, config);
+      onDatasetGenerated(data, config, datasetSizes);
     } catch (error) {
       console.error('Failed to generate dataset:', error);
     }
@@ -92,27 +117,107 @@ export const DatasetConfigComponent: React.FC<DatasetConfigProps> = ({ onDataset
       </div>
 
       {/* Dataset Size & Range Controls */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Size */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs font-mono text-neutral-400">
-            <span>Size (n)</span>
-            <span className="text-blue-400 font-semibold">{size.toLocaleString()}</span>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="md:col-span-12 space-y-3">
+          <div className="flex items-center gap-4 border-b border-white/10 pb-2">
+            <span className="text-xs font-mono text-neutral-400 uppercase tracking-wider">Input Size Mode</span>
+            <div className="flex gap-2 bg-neutral-900 p-1 rounded-lg">
+              <button
+                onClick={() => setSizeMode('single')}
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+                  sizeMode === 'single' ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                Single
+              </button>
+              <button
+                onClick={() => setSizeMode('multiple')}
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+                  sizeMode === 'multiple' ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                Multiple
+              </button>
+              <button
+                onClick={() => setSizeMode('range')}
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+                  sizeMode === 'range' ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                Range
+              </button>
+            </div>
           </div>
-          <input
-            type="range"
-            min={50}
-            max={50000}
-            step={50}
-            value={size}
-            onChange={(e) => setSize(Number(e.target.value))}
-            className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
-          />
-          <div className="flex justify-between text-[10px] text-neutral-500 font-mono">
-            <span>50</span>
-            <span>50,000</span>
+
+          <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+            {sizeMode === 'single' && (
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-mono text-neutral-400">
+                  <span>Size (n)</span>
+                  <span className="text-blue-400 font-semibold">{size.toLocaleString()}</span>
+                </div>
+                <input
+                  type="range"
+                  min={50}
+                  max={100000}
+                  step={50}
+                  value={size}
+                  onChange={(e) => setSize(Number(e.target.value))}
+                  className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+                <div className="flex justify-between text-[10px] text-neutral-500 font-mono">
+                  <span>50</span>
+                  <span>100,000</span>
+                </div>
+              </div>
+            )}
+            {sizeMode === 'multiple' && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono text-neutral-400">Comma-separated sizes</label>
+                <input
+                  type="text"
+                  value={multipleSizesText}
+                  onChange={(e) => setMultipleSizesText(e.target.value)}
+                  placeholder="e.g. 100, 500, 1000, 5000"
+                  className="w-full px-3 py-2 bg-neutral-900 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            )}
+            {sizeMode === 'range' && (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-mono text-neutral-400">Start</label>
+                  <input
+                    type="number"
+                    value={rangeStart}
+                    onChange={(e) => setRangeStart(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-neutral-900 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-mono text-neutral-400">End</label>
+                  <input
+                    type="number"
+                    value={rangeEnd}
+                    onChange={(e) => setRangeEnd(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-neutral-900 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-mono text-neutral-400">Step</label>
+                  <input
+                    type="number"
+                    value={rangeStep}
+                    onChange={(e) => setRangeStep(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-neutral-900 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        <div className="md:col-span-12 grid grid-cols-2 gap-4">
 
         {/* Min */}
         <div className="space-y-1.5">
@@ -134,6 +239,7 @@ export const DatasetConfigComponent: React.FC<DatasetConfigProps> = ({ onDataset
             onChange={(e) => setMax(Number(e.target.value))}
             className="w-full px-3 py-1.5 bg-neutral-900 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
           />
+        </div>
         </div>
       </div>
 

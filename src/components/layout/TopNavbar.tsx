@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Menu, ChevronRight, Sparkles } from 'lucide-react';
+import { Menu, ChevronRight } from 'lucide-react';
 import { NAV_ITEMS } from '../../constants';
 import { ThemeSwitch } from './ThemeSwitch';
 import { CommandPalette } from './CommandPalette';
@@ -44,11 +44,6 @@ export const TopNavbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
       {/* Command Palette & Actions */}
       <div className="flex items-center gap-3">
         <CommandPalette />
-
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Vite Engine</span>
-        </div>
 
         <ThemeSwitch />
       </div>

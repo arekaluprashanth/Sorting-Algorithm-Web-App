@@ -41,7 +41,7 @@ export class CSVExportService {
     lines.push('--- Dataset Configuration ---');
     lines.push('Type,Size');
     lines.push(
-      `${session.config.datasetType},${session.config.datasetSize}`,
+      `${session.config.datasetType},"${session.config.datasetSizes.join(',')}"`,
     );
     lines.push('');
 

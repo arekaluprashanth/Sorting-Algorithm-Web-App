@@ -65,7 +65,7 @@ export const QueueControlPanel: React.FC = () => {
                 <div className="truncate">
                   <span className="font-medium text-white block truncate">{job.name}</span>
                   <span className="text-neutral-400 text-[11px]">
-                    Dataset: {job.config.dataset.length.toLocaleString()} items ({job.config.datasetType})
+                    Dataset Sizes: {job.config.datasetSizes.join(', ')} ({job.config.datasetType})
                   </span>
                 </div>
               </div>

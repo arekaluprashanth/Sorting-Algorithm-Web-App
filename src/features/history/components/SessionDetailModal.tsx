@@ -40,7 +40,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
         {/* Metadata Section */}
       <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-white/10">
         <Badge variant="info">{session.config.datasetType}</Badge>
-        <Badge variant="default">{session.config.datasetSize.toLocaleString()} items</Badge>
+        <Badge variant="default">{session.config.datasetSizes.length > 1 ? 'Multiple sizes' : `${(session.config.datasetSizes[0] ?? 0).toLocaleString()} items`}</Badge>
         <Badge variant="default">{session.results.length} algorithms</Badge>
         <span className="text-[10px] font-mono text-neutral-500 ml-auto">
           {date.toLocaleDateString()} {date.toLocaleTimeString()}
@@ -58,7 +58,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
         />
       </div>
 
-        {/* Reuse the Analytics Dashboard from Phase 6 */}
+        {/* Analytics Dashboard */}
         <AnalyticsDashboard session={session} />
       </Modal>
 

@@ -1,5 +1,5 @@
 /**
- * Phase 7 — History & Session Management Type Definitions.
+ * History & Session Management Type Definitions.
  *
  * These types power the entire history system: storage, filtering,
  * sorting, comparison, and UI state. They are the single source of

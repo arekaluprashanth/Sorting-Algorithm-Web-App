@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
 
 export const ComplexityPage: React.FC = () => {
   return (
@@ -15,7 +14,6 @@ export const ComplexityPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl font-bold text-white tracking-tight">Complexity Study</h1>
-            <Badge variant="info">Phase 1 Foundation</Badge>
           </div>
           <p className="text-xs text-neutral-400">
             Big-O notation theory, algorithm complexity classes, and asymptotic growth bounds

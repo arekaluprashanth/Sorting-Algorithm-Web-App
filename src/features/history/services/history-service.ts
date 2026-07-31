@@ -21,7 +21,7 @@ function generateSessionName(session: BenchmarkSession): string {
     .slice(0, 3)
     .join(', ');
   const suffix = session.results.length > 3 ? ` +${session.results.length - 3}` : '';
-  const size = session.config.datasetSize.toLocaleString();
+  const size = session.config.datasetSizes.length > 1 ? 'Multiple' : (session.config.datasetSizes[0] ?? 0).toLocaleString();
   const type = session.config.datasetType;
   const date = new Date(session.startedAt).toLocaleDateString('en-US', {
     month: 'short',

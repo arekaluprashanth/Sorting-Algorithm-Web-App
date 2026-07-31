@@ -151,7 +151,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       {/* Info row: dataset + algorithms */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <Badge variant="info">{session.config.datasetType}</Badge>
-        <Badge variant="default">{session.config.datasetSize.toLocaleString()} items</Badge>
+        <Badge variant="default">{session.config.datasetSizes.length > 1 ? 'Multiple sizes' : `${(session.config.datasetSizes[0] ?? 0).toLocaleString()} items`}</Badge>
         <span className="text-[10px] text-neutral-500">•</span>
         {session.results.slice(0, 3).map((r) => (
           <Badge key={r.algorithmId} variant="default">{r.algorithmName}</Badge>

@@ -31,7 +31,7 @@ export const PrintableReport: React.FC<PrintableReportProps> = ({ session }) => 
         <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Configuration</h2>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div><strong>Dataset Type:</strong> {session.config.datasetType}</div>
-          <div><strong>Dataset Size:</strong> {session.config.datasetSize.toLocaleString()} items</div>
+          <div><strong>Dataset Sizes:</strong> {session.config.datasetSizes.join(', ')} items</div>
           <div><strong>Warmup Iterations:</strong> {session.config.warmupIterations ?? 1}</div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import type { WorkerRequestMessage, WorkerResponseMessage } from '../features/be
 import type { BenchmarkResult } from '../features/benchmark/engine/types';
 import { getAlgorithm } from '../features/benchmark/engine/algorithms';
 import { createMetricsCollector } from '../features/benchmark/engine/metrics-collector';
+import { DatasetGenerator } from '../features/dataset/generators';
 
 const BYTES_PER_ELEMENT = 8;
 let cancelledJobIds = new Set<string>();
@@ -44,42 +45,125 @@ self.addEventListener('message', (event: MessageEvent<WorkerRequestMessage>) => 
       cancelledJobIds.delete(jobId);
 
       const totalAlgorithms = config.algorithmIds.length;
+      const totalSizes = config.datasetSizes.length;
       const warmupCount = Math.max(0, config.warmupIterations);
-      const totalIterationsPerAlgo = warmupCount + 1; // warmup + 1 actual run
-      const totalIterations = totalAlgorithms * totalIterationsPerAlgo;
+      const totalIterationsPerAlgoPerSize = warmupCount + 1;
+      const totalIterations = totalAlgorithms * totalSizes * totalIterationsPerAlgoPerSize;
 
       const results: BenchmarkResult[] = [];
       const sessionStartTime = performance.now();
       let completedIterations = 0;
 
       try {
-        for (let algoIdx = 0; algoIdx < totalAlgorithms; algoIdx++) {
-          const algoId = config.algorithmIds[algoIdx]!;
-
+        for (let sizeIdx = 0; sizeIdx < totalSizes; sizeIdx++) {
+          const currentSize = config.datasetSizes[sizeIdx]!;
+          
           if (cancelledJobIds.has(jobId)) {
             sendResponse({ type: 'CANCEL', payload: { jobId } });
             return;
           }
 
-          const algorithm = getAlgorithm(algoId);
+          // Generate dataset for this specific size locally in the worker
+          const datasetOpts = {
+            ...(config.datasetOptions || {}),
+            type: config.datasetType as any,
+            size: currentSize,
+          };
+          
+          const dataset = DatasetGenerator.generate(datasetOpts).data;
+          // Removed unused datasetGenTime
 
-          // ── 1. Warm-up Iterations ──────────────────────────────────────────
-          for (let w = 0; w < warmupCount; w++) {
+          // Now run all selected algorithms against this dataset size
+          for (let algoIdx = 0; algoIdx < totalAlgorithms; algoIdx++) {
+            const algoId = config.algorithmIds[algoIdx]!;
+
             if (cancelledJobIds.has(jobId)) {
               sendResponse({ type: 'CANCEL', payload: { jobId } });
               return;
             }
 
-            const warmupData = [...config.dataset];
-            const warmupCollector = createMetricsCollector();
-            algorithm.sort(warmupData, warmupCollector);
+            const algorithm = getAlgorithm(algoId);
+
+            // ── 1. Warm-up Iterations ──────────────────────────────────────────
+            for (let w = 0; w < warmupCount; w++) {
+              if (cancelledJobIds.has(jobId)) {
+                sendResponse({ type: 'CANCEL', payload: { jobId } });
+                return;
+              }
+
+              const warmupData = [...dataset];
+              const warmupCollector = createMetricsCollector();
+              algorithm.sort(warmupData, warmupCollector);
+
+              completedIterations++;
+              const elapsedMs = performance.now() - sessionStartTime;
+              const pct = Math.round((completedIterations / totalIterations) * 100);
+              const avgTimePerIteration = completedIterations > 0 ? elapsedMs / completedIterations : 0;
+              const remainingIterations = totalIterations - completedIterations;
+              const estRemainingMs = Math.round(remainingIterations * avgTimePerIteration);
+
+              sendResponse({
+                type: 'PROGRESS',
+                payload: {
+                  jobId,
+                  algorithmId: algoId,
+                  algorithmName: algorithm.name,
+                  currentAlgorithmIndex: algoIdx + 1,
+                  totalAlgorithms,
+                  currentIteration: completedIterations,
+                  totalIterations,
+                  datasetSize: currentSize,
+                  completedPercentage: pct,
+                  elapsedTimeMs: Math.round(elapsedMs),
+                  estimatedTimeRemainingMs: estRemainingMs,
+                  throughputOpsPerSec: completedIterations > 0 ? Math.round((completedIterations * currentSize) / (elapsedMs / 1000)) : 0,
+                },
+              });
+            }
+
+            // ── 2. Actual Measured Run ─────────────────────────────────────────
+            if (cancelledJobIds.has(jobId)) {
+              sendResponse({ type: 'CANCEL', payload: { jobId } });
+              return;
+            }
+
+            const data = [...dataset];
+            const collector = createMetricsCollector();
+
+            const startTime = performance.now();
+            const sorted = algorithm.sort(data, collector);
+            const endTime = performance.now();
+
+            const metrics = collector.getMetrics();
+            const correct = isSorted(sorted);
+            const executionTimeMs = endTime - startTime;
+
+            const result: BenchmarkResult = {
+              algorithmId: algorithm.id,
+              algorithmName: algorithm.name,
+              datasetSize: currentSize,
+              datasetType: config.datasetType,
+              executionTimeMs,
+              comparisons: metrics.comparisons,
+              swaps: metrics.swaps,
+              memoryEstimateBytes: metrics.peakMemoryElements * BYTES_PER_ELEMENT,
+              maxRecursionDepth: metrics.maxRecursionDepth,
+              correct,
+              timestamp: Date.now(),
+            };
+
+            results.push(result);
+
+            sendResponse({
+              type: 'RESULT',
+              payload: { jobId, algorithmId: algoId, result },
+            });
 
             completedIterations++;
             const elapsedMs = performance.now() - sessionStartTime;
             const pct = Math.round((completedIterations / totalIterations) * 100);
-            const avgTimePerIteration = completedIterations > 0 ? elapsedMs / completedIterations : 0;
-            const remainingIterations = totalIterations - completedIterations;
-            const estRemainingMs = Math.round(remainingIterations * avgTimePerIteration);
+            const avgTimePerIteration = elapsedMs / completedIterations;
+            const estRemainingMs = Math.round((totalIterations - completedIterations) * avgTimePerIteration);
 
             sendResponse({
               type: 'PROGRESS',
@@ -91,76 +175,14 @@ self.addEventListener('message', (event: MessageEvent<WorkerRequestMessage>) => 
                 totalAlgorithms,
                 currentIteration: completedIterations,
                 totalIterations,
-                datasetSize: config.dataset.length,
+                datasetSize: currentSize,
                 completedPercentage: pct,
                 elapsedTimeMs: Math.round(elapsedMs),
                 estimatedTimeRemainingMs: estRemainingMs,
-                throughputOpsPerSec: completedIterations > 0 ? Math.round((completedIterations * config.dataset.length) / (elapsedMs / 1000)) : 0,
+                throughputOpsPerSec: Math.round((completedIterations * currentSize) / (elapsedMs / 1000)),
               },
             });
           }
-
-          // ── 2. Actual Measured Run ─────────────────────────────────────────
-          if (cancelledJobIds.has(jobId)) {
-            sendResponse({ type: 'CANCEL', payload: { jobId } });
-            return;
-          }
-
-          const data = [...config.dataset];
-          const collector = createMetricsCollector();
-
-          const startTime = performance.now();
-          const sorted = algorithm.sort(data, collector);
-          const endTime = performance.now();
-
-          const metrics = collector.getMetrics();
-          const correct = isSorted(sorted);
-          const executionTimeMs = endTime - startTime;
-
-          const result: BenchmarkResult = {
-            algorithmId: algorithm.id,
-            algorithmName: algorithm.name,
-            datasetSize: config.dataset.length,
-            datasetType: config.datasetType,
-            executionTimeMs,
-            comparisons: metrics.comparisons,
-            swaps: metrics.swaps,
-            memoryEstimateBytes: metrics.peakMemoryElements * BYTES_PER_ELEMENT,
-            maxRecursionDepth: metrics.maxRecursionDepth,
-            correct,
-            timestamp: Date.now(),
-          };
-
-          results.push(result);
-
-          sendResponse({
-            type: 'RESULT',
-            payload: { jobId, algorithmId: algoId, result },
-          });
-
-          completedIterations++;
-          const elapsedMs = performance.now() - sessionStartTime;
-          const pct = Math.round((completedIterations / totalIterations) * 100);
-          const avgTimePerIteration = elapsedMs / completedIterations;
-          const estRemainingMs = Math.round((totalIterations - completedIterations) * avgTimePerIteration);
-
-          sendResponse({
-            type: 'PROGRESS',
-            payload: {
-              jobId,
-              algorithmId: algoId,
-              algorithmName: algorithm.name,
-              currentAlgorithmIndex: algoIdx + 1,
-              totalAlgorithms,
-              currentIteration: completedIterations,
-              totalIterations,
-              datasetSize: config.dataset.length,
-              completedPercentage: pct,
-              elapsedTimeMs: Math.round(elapsedMs),
-              estimatedTimeRemainingMs: estRemainingMs,
-              throughputOpsPerSec: Math.round((completedIterations * config.dataset.length) / (elapsedMs / 1000)),
-            },
-          });
         }
 
         sendResponse({

@@ -66,7 +66,7 @@ export class PDFExportService {
       
       const statsLeft = [
         `Dataset Type: ${session.config.datasetType}`,
-        `Dataset Size: ${session.config.datasetSize.toLocaleString()}`,
+        `Dataset Sizes: ${session.config.datasetSizes.join(', ')}`,
         `Algorithms Tested: ${session.results.length}`,
       ];
       

@@ -143,10 +143,12 @@ export interface BenchmarkResult {
 export interface BenchmarkConfig {
   /** IDs of algorithms to benchmark. */
   algorithmIds: string[];
-  /** The dataset to sort. */
-  dataset: number[];
-  /** Metadata about the dataset. */
+  /** The dataset sizes to test. */
+  datasetSizes: number[];
+  /** Metadata and generation options for the dataset. */
   datasetType: string;
+  /** (Optional) Detailed config used for generation (can include min, max, seed, etc). */
+  datasetOptions?: any;
   /** Number of warm-up iterations before measurement. */
   warmupIterations: number;
 }
@@ -158,7 +160,7 @@ export interface BenchmarkSession {
   /** Results for each algorithm. */
   results: BenchmarkResult[];
   /** Session configuration. */
-  config: Omit<BenchmarkConfig, 'dataset'> & { datasetSize: number };
+  config: BenchmarkConfig;
   /** When the session started. */
   startedAt: number;
   /** When the session completed. */
