@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useMemo, useRef } from 'react';
+import React, { createContext, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import type { BenchmarkSession } from '../engine/types';
 import { runBenchmarkSession } from '../engine/benchmark-runner';
 import type { DatasetConfig } from '../../dataset';
@@ -6,6 +6,8 @@ import { generateDataset } from '../../dataset';
 import { HistoryService } from '../../history/services/history-service';
 import { LocalStorageAdapter } from '../../history/storage/local-storage-adapter';
 import { SessionRepository } from '../../history/storage/session-repository';
+import { WorkerManager } from '../services/WorkerManager';
+import type { WorkerProgressPayload } from '../types/worker.types';
 
 interface BenchmarkContextType {
   selectedAlgorithms: string[];
@@ -18,7 +20,9 @@ interface BenchmarkContextType {
   isRunning: boolean;
   warmupIterations: number;
   setWarmupIterations: React.Dispatch<React.SetStateAction<number>>;
+  progress: WorkerProgressPayload | null;
   runCurrentBenchmark: () => Promise<BenchmarkSession | null>;
+  cancelBenchmark: () => void;
   clearSession: () => void;
 }
 
@@ -43,6 +47,9 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [currentSession, setCurrentSession] = useState<BenchmarkSession | null>(null);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [warmupIterations, setWarmupIterations] = useState<number>(1);
+  const [progress, setProgress] = useState<WorkerProgressPayload | null>(null);
+
+  const workerManagerRef = useRef<WorkerManager | null>(null);
 
   // Lazily initialise the history service for auto-save
   const historyServiceRef = useRef<HistoryService | null>(null);
@@ -52,30 +59,104 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     );
   }
 
+  useEffect(() => {
+    try {
+      const wm = new WorkerManager('context-worker');
+      wm.initialize();
+      workerManagerRef.current = wm;
+    } catch (e) {
+      console.warn('[BenchmarkContext] Web Worker initialization failed, falling back to sync:', e);
+    }
+
+    return () => {
+      workerManagerRef.current?.terminate();
+    };
+  }, []);
+
+  const cancelBenchmark = useCallback(() => {
+    if (workerManagerRef.current) {
+      workerManagerRef.current.cancelJob('current-job');
+    }
+    setIsRunning(false);
+    setProgress(null);
+  }, []);
+
   const runCurrentBenchmark = useCallback(async (): Promise<BenchmarkSession | null> => {
     if (selectedAlgorithms.length === 0 || dataset.length === 0) return null;
 
     setIsRunning(true);
-    try {
-      // Small timeout to allow UI loading spinner to render smoothly
-      await new Promise((res) => setTimeout(res, 50));
+    setProgress(null);
 
-      const session = runBenchmarkSession({
-        algorithmIds: selectedAlgorithms,
-        dataset,
-        datasetType: datasetConfig.type,
-        warmupIterations,
+    const startedAt = Date.now();
+    const config = {
+      algorithmIds: selectedAlgorithms,
+      dataset,
+      datasetType: datasetConfig.type,
+      warmupIterations,
+    };
+
+    // Try executing in Web Worker asynchronously
+    if (workerManagerRef.current) {
+      return new Promise<BenchmarkSession | null>((resolve) => {
+        const jobId = `job-${Date.now()}`;
+
+        workerManagerRef.current?.setListeners({
+          onProgress: (p) => setProgress(p),
+          onComplete: (results, _durationMs) => {
+            const completedAt = Date.now();
+            const session: BenchmarkSession = {
+              id: `bench-${Date.now().toString(36)}`,
+              results,
+              config: {
+                algorithmIds: selectedAlgorithms,
+                datasetType: datasetConfig.type,
+                warmupIterations,
+                datasetSize: dataset.length,
+              },
+              startedAt,
+              completedAt,
+            };
+
+            setCurrentSession(session);
+            setIsRunning(false);
+            setProgress(null);
+
+            try {
+              historyServiceRef.current?.saveSession(session);
+            } catch (e) {
+              console.warn('[BenchmarkContext] Failed to auto-save session:', e);
+            }
+
+            resolve(session);
+          },
+          onError: (error) => {
+            console.error('Worker benchmark failed:', error);
+            setIsRunning(false);
+            setProgress(null);
+            resolve(null);
+          },
+          onCancel: () => {
+            setIsRunning(false);
+            setProgress(null);
+            resolve(null);
+          },
+        });
+
+        workerManagerRef.current?.runJob(jobId, config);
       });
+    }
 
+    // Fallback sync execution if Web Worker unavailable
+    try {
+      await new Promise((res) => setTimeout(res, 50));
+      const session = runBenchmarkSession(config);
       setCurrentSession(session);
 
-      // ── Auto-save to history ──────────────────────────────────────────
       try {
         historyServiceRef.current?.saveSession(session);
       } catch (e) {
-        console.warn('[BenchmarkContext] Failed to auto-save session to history:', e);
+        console.warn('[BenchmarkContext] Failed to auto-save session:', e);
       }
-
       return session;
     } catch (error) {
       console.error('Benchmark run failed:', error);
@@ -101,7 +182,9 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       isRunning,
       warmupIterations,
       setWarmupIterations,
+      progress,
       runCurrentBenchmark,
+      cancelBenchmark,
       clearSession,
     }),
     [
@@ -111,7 +194,9 @@ export const BenchmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       currentSession,
       isRunning,
       warmupIterations,
+      progress,
       runCurrentBenchmark,
+      cancelBenchmark,
       clearSession,
     ]
   );

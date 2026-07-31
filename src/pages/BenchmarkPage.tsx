@@ -1,6 +1,6 @@
 import React from 'react';
-import { DatasetStudio } from '../features/dataset';
+import { BenchmarkPage as BenchmarkStudio } from '../features/benchmark/pages/BenchmarkPage';
 
 export const BenchmarkPage: React.FC = () => {
-  return <DatasetStudio />;
+  return <BenchmarkStudio />;
 };

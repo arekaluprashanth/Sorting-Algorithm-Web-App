@@ -4,14 +4,19 @@ import { DatasetConfigComponent } from '../../dataset/components/DatasetConfig';
 import { AlgorithmSelector } from '../components/AlgorithmSelector';
 import { BenchmarkControls } from '../components/BenchmarkControls';
 import { ResultsPanel } from '../components/ResultsPanel';
+import { QueueControlPanel } from '../components/QueueControlPanel';
+import { PerformanceMonitorPanel } from '../components/PerformanceMonitorPanel';
 
 export const BenchmarkPage: React.FC = () => {
   const {
     selectedAlgorithms,
     setSelectedAlgorithms,
+    dataset,
     setDataset,
     setDatasetConfig,
     currentSession,
+    isRunning,
+    progress,
   } = useBenchmark();
 
   return (
@@ -30,8 +35,18 @@ export const BenchmarkPage: React.FC = () => {
         onChange={setSelectedAlgorithms}
       />
 
+      {/* Real-time Performance & Memory Monitor */}
+      <PerformanceMonitorPanel
+        datasetSize={dataset.length}
+        progress={progress}
+        isRunning={isRunning}
+      />
+
       {/* Step 3: Run Action Controls */}
       <BenchmarkControls />
+
+      {/* Queue Manager Panel */}
+      <QueueControlPanel />
 
       {/* Step 4: Results Display */}
       <ResultsPanel session={currentSession} />
