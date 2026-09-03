@@ -1,6 +1,6 @@
-# SortBench
+# Sorting Algoritm Web App
 
-SortBench is an interactive web app for learning and comparing sorting algorithms. It combines step-by-step visualizations, execution metrics, complexity analysis, benchmarking, and generated implementations in C++, Python, and Java.
+Sorting Algoritm Web App is an interactive web app for learning and comparing sorting algorithms. It combines step-by-step visualizations, execution metrics, complexity analysis, benchmarking, and generated implementations in C++, Python, and Java.
 
 ## Features
 
