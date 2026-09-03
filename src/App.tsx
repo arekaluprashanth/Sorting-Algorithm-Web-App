@@ -7,27 +7,6 @@ export default function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
-    const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-    if (!favicon) return;
-
-    const frames = [0, 120, 240, 360];
-    let frameIndex = 0;
-    const updateFavicon = () => {
-      const rotation = frames[frameIndex];
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f172a"/><circle cx="32" cy="32" r="20" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="3 5"/><g transform="rotate(${rotation} 32 32)"><circle cx="32" cy="12" r="5" fill="#38bdf8"/><circle cx="49" cy="42" r="5" fill="#34d399"/><circle cx="15" cy="42" r="5" fill="#fbbf24"/></g><path d="M32 25v14M25 32h14" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round"/></svg>`;
-      favicon.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
-      frameIndex = (frameIndex + 1) % frames.length;
-    };
-
-    updateFavicon();
-    const timer = window.setInterval(updateFavicon, 420);
-    return () => {
-      window.clearInterval(timer);
-      favicon.href = '/assets/favicon.svg';
-    };
-  }, []);
-
-  useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 480);
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
