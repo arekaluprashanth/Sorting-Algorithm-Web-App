@@ -417,6 +417,44 @@ export const UnifiedSortingDashboard: React.FC = () => {
       y += lines.length * (size + 4) + 4;
     };
 
+    const addTable = (headers: string[], rows: string[][], columnWidths: number[]) => {
+      const headerHeight = 24;
+      ensureSpace(headerHeight + 12);
+      let x = margin;
+      doc.setFillColor(30, 41, 59);
+      doc.rect(margin, y, contentWidth, headerHeight, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(248, 250, 252);
+      headers.forEach((header, index) => {
+        doc.text(header, x + 8, y + 16);
+        x += columnWidths[index];
+      });
+      y += headerHeight;
+
+      rows.forEach((row, rowIndex) => {
+        const wrappedCells = row.map((cell, index) => doc.splitTextToSize(cell, columnWidths[index] - 16));
+        const rowHeight = Math.max(...wrappedCells.map((cell) => cell.length), 1) * 11 + 10;
+        ensureSpace(rowHeight);
+        if (rowIndex % 2 === 0) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(margin, y, contentWidth, rowHeight, 'F');
+        }
+        x = margin;
+        wrappedCells.forEach((cell, index) => {
+          doc.setFont('helvetica', index === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+          doc.setTextColor(index === 0 ? 15 : 71, index === 0 ? 23 : 85, index === 0 ? 42 : 105);
+          doc.text(cell, x + 8, y + 15);
+          x += columnWidths[index];
+        });
+        doc.setDrawColor(226, 232, 240);
+        doc.line(margin, y + rowHeight, margin + contentWidth, y + rowHeight);
+        y += rowHeight;
+      });
+      y += 12;
+    };
+
     doc.setFillColor(15, 23, 42);
     doc.rect(0, 0, pageWidth, 132, 'F');
     doc.setFillColor(99, 102, 241);
@@ -452,21 +490,34 @@ export const UnifiedSortingDashboard: React.FC = () => {
       ['Stability', selectedAlgo.stable ? 'Stable' : 'Unstable'],
       ['Memory behavior', selectedAlgo.inPlace ? 'In-place' : 'Out-of-place'],
     ];
-    profileRows.forEach(([label, value]) => {
-      ensureSpace(21);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(71, 85, 105);
-      doc.text(label, margin, y);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(15, 23, 42);
-      doc.text(value, margin + 112, y);
-      y += 18;
-    });
+    addTable(['Property', 'Details'], profileRows, [112, contentWidth - 112]);
 
     addSectionTitle('Selected Input and Result');
     addWrappedText(`Input array (N = ${appliedArray.length}): [${appliedArray.join(', ')}]`, 9, [15, 23, 42]);
     addWrappedText(`Sorted result: [${finalArr.join(', ')}]`, 9, [15, 23, 42]);
+
+    addSectionTitle('Input Array Analysis');
+    addTable(
+      ['Measure', 'Value'],
+      [
+        ['Elements', appliedArray.length.toLocaleString()],
+        ['Ordering', arrayStats.stateLabel],
+        ['Out-of-order pairs', arrayStats.inversions.toLocaleString()],
+        ['Disorder', `${arrayStats.disorderPercent}%`],
+        ['Input summary', arrayStats.description],
+      ],
+      [150, contentWidth - 150]
+    );
+
+    addSectionTitle('Performance on This Input');
+    addTable(
+      ['Algorithm', 'Comparisons', 'Swaps / shifts', 'Total operations'],
+      userArrayAlgoResults
+        .slice()
+        .sort((a, b) => a.totalOps - b.totalOps)
+        .map((result) => [result.name, result.comparisons.toLocaleString(), result.swaps.toLocaleString(), result.totalOps.toLocaleString()]),
+      [170, 105, 105, contentWidth - 380]
+    );
 
     ensureSpace(70);
     const metricCards = [
@@ -494,6 +545,11 @@ export const UnifiedSortingDashboard: React.FC = () => {
     const currentDescription = steps[currentStepIdx]?.description || 'Ready to begin.';
     addWrappedText(currentDescription, 10, [15, 23, 42]);
     addWrappedText(`Progress at this frame: ${currentStep.comparisons.toLocaleString()} comparisons, ${currentStep.swaps.toLocaleString()} swaps / shifts.`, 9);
+
+    addSectionTitle('Pseudocode');
+    (selectedAlgo.pseudocode || []).forEach((line, index) => {
+      addWrappedText(`${index + 1}.  ${line}`, 8, [51, 65, 85]);
+    });
 
     addSectionTitle('Execution Trace');
     steps.forEach((step, index) => {
