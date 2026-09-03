@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
+import { jsPDF } from 'jspdf';
 import {
   Play,
   Pause,
@@ -363,6 +364,155 @@ export const UnifiedSortingDashboard: React.FC = () => {
     md += `*Generated automatically by Algorithm Visualizer on ${new Date().toLocaleDateString()}*\n`;
 
     downloadFile(`${selectedAlgo.id}_report.md`, md, 'text/markdown');
+    setDownloadMenuOpen(false);
+  };
+
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 42;
+    const contentWidth = pageWidth - margin * 2;
+    const finalArr = steps.length > 0 ? steps[steps.length - 1].array : [...appliedArray].sort((a, b) => a - b);
+    const totalC = steps.length > 0 ? steps[steps.length - 1].comparisons : 0;
+    const totalS = steps.length > 0 ? steps[steps.length - 1].swaps : 0;
+    let y = 0;
+
+    const addFooter = () => {
+      doc.setDrawColor(226, 232, 240);
+      doc.line(margin, pageHeight - 34, pageWidth - margin, pageHeight - 34);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Sorting Algoritm Web App', margin, pageHeight - 20);
+      doc.text(`Page ${doc.getNumberOfPages()}`, pageWidth - margin, pageHeight - 20, { align: 'right' });
+    };
+
+    const ensureSpace = (height: number) => {
+      if (y + height > pageHeight - 54) {
+        addFooter();
+        doc.addPage();
+        y = margin;
+      }
+    };
+
+    const addSectionTitle = (title: string) => {
+      ensureSpace(32);
+      doc.setFillColor(238, 242, 255);
+      doc.roundedRect(margin, y, contentWidth, 24, 5, 5, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 41, 59);
+      doc.text(title, margin + 10, y + 16);
+      y += 36;
+    };
+
+    const addWrappedText = (text: string, size = 9, color: [number, number, number] = [71, 85, 105]) => {
+      const lines = doc.splitTextToSize(text, contentWidth);
+      ensureSpace(lines.length * (size + 4) + 4);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+      doc.text(lines, margin, y);
+      y += lines.length * (size + 4) + 4;
+    };
+
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, pageWidth, 132, 'F');
+    doc.setFillColor(99, 102, 241);
+    doc.roundedRect(margin, 30, 44, 44, 10, 10, 'F');
+    doc.setDrawColor(56, 189, 248);
+    doc.setLineWidth(3);
+    doc.line(margin + 12, 61, margin + 18, 48);
+    doc.line(margin + 22, 61, margin + 28, 42);
+    doc.line(margin + 32, 61, margin + 38, 35);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(23);
+    doc.setTextColor(248, 250, 252);
+    doc.text('Execution Analysis Report', margin, 101);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(165, 180, 252);
+    doc.text('Sorting Algoritm Web App', margin, 119);
+    y = 164;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(17);
+    doc.setTextColor(15, 23, 42);
+    doc.text(selectedAlgo.name, margin, y);
+    y += 22;
+    addWrappedText(selectedAlgo.tagline, 10, [71, 85, 105]);
+    addWrappedText(`Generated ${new Date().toLocaleString()}  |  Current frame ${currentStepIdx + 1} of ${steps.length}`, 8, [100, 116, 139]);
+
+    addSectionTitle('Algorithm Profile');
+    const profileRows = [
+      ['Category', selectedAlgo.category.replace(/_/g, ' ')],
+      ['Time complexity', `Best: ${selectedAlgo.bestTime}   Average: ${selectedAlgo.avgTime}   Worst: ${selectedAlgo.worstTime}`],
+      ['Space complexity', selectedAlgo.space],
+      ['Stability', selectedAlgo.stable ? 'Stable' : 'Unstable'],
+      ['Memory behavior', selectedAlgo.inPlace ? 'In-place' : 'Out-of-place'],
+    ];
+    profileRows.forEach(([label, value]) => {
+      ensureSpace(21);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(71, 85, 105);
+      doc.text(label, margin, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(15, 23, 42);
+      doc.text(value, margin + 112, y);
+      y += 18;
+    });
+
+    addSectionTitle('Selected Input and Result');
+    addWrappedText(`Input array (N = ${appliedArray.length}): [${appliedArray.join(', ')}]`, 9, [15, 23, 42]);
+    addWrappedText(`Sorted result: [${finalArr.join(', ')}]`, 9, [15, 23, 42]);
+
+    ensureSpace(70);
+    const metricCards = [
+      ['Frames', steps.length.toLocaleString(), [79, 70, 229] as [number, number, number]],
+      ['Comparisons', totalC.toLocaleString(), [5, 150, 105] as [number, number, number]],
+      ['Swaps / shifts', totalS.toLocaleString(), [225, 29, 72] as [number, number, number]],
+    ];
+    const cardWidth = (contentWidth - 18) / 3;
+    metricCards.forEach(([label, value, color], index) => {
+      const x = margin + index * (cardWidth + 9);
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(x, y, cardWidth, 52, 6, 6, 'FD');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text(label as string, x + 9, y + 17);
+      doc.setFontSize(15);
+      doc.setTextColor(...(color as [number, number, number]));
+      doc.text(value as string, x + 9, y + 39);
+    });
+    y += 72;
+
+    addSectionTitle('Current Execution Step');
+    const currentDescription = steps[currentStepIdx]?.description || 'Ready to begin.';
+    addWrappedText(currentDescription, 10, [15, 23, 42]);
+    addWrappedText(`Progress at this frame: ${currentStep.comparisons.toLocaleString()} comparisons, ${currentStep.swaps.toLocaleString()} swaps / shifts.`, 9);
+
+    addSectionTitle('Execution Trace');
+    steps.forEach((step, index) => {
+      const traceText = `${String(index + 1).padStart(3, '0')}   ${step.description}   [${step.comparisons} comparisons / ${step.swaps} swaps]`;
+      const lines = doc.splitTextToSize(traceText, contentWidth - 14);
+      ensureSpace(lines.length * 12 + 8);
+      if (index % 2 === 0) {
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(margin, y - 10, contentWidth, lines.length * 12 + 8, 3, 3, 'F');
+      }
+      doc.setFont('courier', index === currentStepIdx ? 'bold' : 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(index === currentStepIdx ? 79 : 71, index === currentStepIdx ? 70 : 85, index === currentStepIdx ? 229 : 105);
+      doc.text(lines, margin + 7, y);
+      y += lines.length * 12 + 5;
+    });
+
+    addFooter();
+    doc.save(`${selectedAlgo.id}_execution_report.pdf`);
     setDownloadMenuOpen(false);
   };
 
@@ -1480,6 +1630,17 @@ export const UnifiedSortingDashboard: React.FC = () => {
                   <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
                     Save to Laptop Downloads
                   </div>
+
+                  <button
+                    onClick={handleDownloadPdf}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-indigo-50 hover:text-indigo-900 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  >
+                    <FileDown className="w-4 h-4 text-rose-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-slate-900">Professional PDF Report</div>
+                      <div className="text-[10px] text-slate-500">Selected array, metrics & full trace</div>
+                    </div>
+                  </button>
 
                   <button
                     onClick={handleDownloadTraceJson}
