@@ -2161,35 +2161,6 @@ export const UnifiedSortingDashboard: React.FC = () => {
 
             </div>
 
-            {/* Quick Leaderboard Highlights */}
-            <div className="grid grid-cols-3 gap-2 text-center">
-              {(() => {
-                const sortedByMetric = [...userArrayAlgoResults].sort((a, b) => (a[graphMetric] as number) - (b[graphMetric] as number));
-                const fastest = sortedByMetric[0];
-                const slowest = sortedByMetric[sortedByMetric.length - 1];
-                const active = userArrayAlgoResults.find((a) => a.id === selectedAlgoId);
-                return (
-                  <>
-                    <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/70">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Least Work</div>
-                      <div className="text-xs font-bold text-slate-900 truncate mt-0.5">{fastest?.name || '—'}</div>
-                      <div className="text-sm font-extrabold font-mono text-emerald-600">{fastest ? `${fastest[graphMetric].toLocaleString()}` : '0'} ops</div>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/70">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">Active Algo</div>
-                      <div className="text-xs font-bold text-slate-900 truncate mt-0.5">{active?.name || selectedAlgo.name}</div>
-                      <div className="text-sm font-extrabold font-mono text-indigo-600">{active ? `${active[graphMetric].toLocaleString()}` : '0'} ops</div>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Most Work</div>
-                      <div className="text-xs font-bold text-slate-900 truncate mt-0.5">{slowest?.name || '—'}</div>
-                      <div className="text-sm font-extrabold font-mono text-slate-700">{slowest ? `${slowest[graphMetric].toLocaleString()}` : '0'} ops</div>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
             {/* Selected algorithm comparison chart */}
             <div className="h-[280px] w-full pt-1">
               {categoryFilter === 'compare' ? (
