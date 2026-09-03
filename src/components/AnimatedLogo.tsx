@@ -12,11 +12,12 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({ className = '' }) =>
     aria-label="Sorting Algorithm Web App logo"
   >
     <rect width="64" height="64" rx="14" fill="#0f172a" />
-    <g className="animated-logo-bars">
-      <rect x="12" y="40" width="10" height="12" rx="3" fill="#38bdf8" />
-      <rect x="27" y="31" width="10" height="21" rx="3" fill="#34d399" />
-      <rect x="42" y="20" width="10" height="32" rx="3" fill="#fbbf24" />
+    <circle className="animated-logo-orbit" cx="32" cy="32" r="20" fill="none" stroke="#334155" strokeWidth="2" strokeDasharray="3 5" />
+    <g className="animated-logo-nodes">
+      <circle cx="32" cy="12" r="5" fill="#38bdf8" />
+      <circle cx="49" cy="42" r="5" fill="#34d399" />
+      <circle cx="15" cy="42" r="5" fill="#fbbf24" />
     </g>
-    <path className="animated-logo-sweep" d="M12 53h40M43 13l9 0-4 4" fill="none" stroke="#fb7185" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path className="animated-logo-sweep" d="M32 25v14M25 32h14" fill="none" stroke="#fb7185" strokeWidth="2.5" strokeLinecap="round" />
   </svg>
 );

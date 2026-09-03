@@ -10,23 +10,11 @@ export default function App() {
     const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     if (!favicon) return;
 
-    const frames = [
-      [12, 21, 32],
-      [18, 14, 25],
-      [25, 18, 14],
-      [16, 28, 20],
-    ];
+    const frames = [0, 120, 240, 360];
     let frameIndex = 0;
     const updateFavicon = () => {
-      const heights = frames[frameIndex];
-      const bars = heights.map((height, index) => {
-        const x = 12 + index * 15;
-        const width = 10;
-        const y = 52 - height;
-        const colors = ['#38bdf8', '#34d399', '#fbbf24'];
-        return `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="2" fill="${colors[index]}"/>`;
-      }).join('');
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f172a"/>${bars}<path d="M12 53h40M43 13h9l-4 4" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      const rotation = frames[frameIndex];
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f172a"/><circle cx="32" cy="32" r="20" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="3 5"/><g transform="rotate(${rotation} 32 32)"><circle cx="32" cy="12" r="5" fill="#38bdf8"/><circle cx="49" cy="42" r="5" fill="#34d399"/><circle cx="15" cy="42" r="5" fill="#fbbf24"/></g><path d="M32 25v14M25 32h14" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round"/></svg>`;
       favicon.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
       frameIndex = (frameIndex + 1) % frames.length;
     };

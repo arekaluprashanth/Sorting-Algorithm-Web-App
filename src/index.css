@@ -102,31 +102,29 @@ main > div > section {
   will-change: transform, opacity;
 }
 
-.animated-logo-bars rect {
-  transform-box: fill-box;
-  transform-origin: center bottom;
-  animation: logo-sort 1.2s ease-in-out infinite alternate;
+.animated-logo-nodes {
+  transform-origin: 32px 32px;
+  animation: logo-orbit 2.4s linear infinite;
 }
 
-.animated-logo-bars rect:nth-child(2) {
-  animation-delay: 120ms;
-}
-
-.animated-logo-bars rect:nth-child(3) {
-  animation-delay: 240ms;
+.animated-logo-orbit {
+  animation: logo-pulse 1.8s ease-in-out infinite alternate;
 }
 
 .animated-logo-sweep {
-  stroke-dasharray: 11 40;
-  animation: logo-sweep 1.2s ease-in-out infinite;
+  animation: logo-cross 1.8s ease-in-out infinite alternate;
 }
 
-@keyframes logo-sort {
-  0% { transform: scaleY(0.68); opacity: 0.72; }
-  100% { transform: scaleY(1); opacity: 1; }
+@keyframes logo-orbit {
+  to { transform: rotate(360deg); }
 }
 
-@keyframes logo-sweep {
-  0% { stroke-dashoffset: 52; opacity: 0.25; }
-  55%, 100% { stroke-dashoffset: 0; opacity: 0.95; }
+@keyframes logo-pulse {
+  from { opacity: 0.45; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes logo-cross {
+  from { opacity: 0.35; transform: rotate(0deg) scale(0.8); }
+  to { opacity: 1; transform: rotate(90deg) scale(1); }
 }
