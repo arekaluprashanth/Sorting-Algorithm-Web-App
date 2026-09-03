@@ -816,6 +816,12 @@ export const UnifiedSortingDashboard: React.FC = () => {
     });
   };
 
+  const comparisonResults = useMemo(() => {
+    return comparisonAlgoIds
+      .map((id) => userArrayAlgoResults.find((result) => result.id === id))
+      .filter((result): result is typeof userArrayAlgoResults[number] => Boolean(result));
+  }, [comparisonAlgoIds, userArrayAlgoResults]);
+
   return (
     <div className="w-full space-y-8 pb-16">
       {/* 1. TOP HEADER & ALGORITHM SELECTOR (ALL 15 ALGORITHMS) */}
@@ -956,37 +962,67 @@ export const UnifiedSortingDashboard: React.FC = () => {
                 Choose at least two algorithms above to start comparing.
               </p>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-indigo-100 bg-white">
-                <table className="w-full min-w-[620px] text-left text-xs">
-                  <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
-                    <tr>
-                      <th className="px-3 py-2.5 font-bold">Algorithm</th>
-                      <th className="px-3 py-2.5 font-bold">Best</th>
-                      <th className="px-3 py-2.5 font-bold">Average</th>
-                      <th className="px-3 py-2.5 font-bold">Worst</th>
-                      <th className="px-3 py-2.5 font-bold">Space</th>
-                      <th className="px-3 py-2.5 font-bold">Stable</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {comparisonAlgoIds.map((id) => {
-                      const comparisonAlgo = ALGORITHMS[id].info;
+              <div className="space-y-4">
+                <div className="overflow-x-auto rounded-xl border border-indigo-100 bg-white">
+                  <table className="w-full min-w-[620px] text-left text-xs">
+                    <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2.5 font-bold">Algorithm</th>
+                        <th className="px-3 py-2.5 font-bold">Best</th>
+                        <th className="px-3 py-2.5 font-bold">Average</th>
+                        <th className="px-3 py-2.5 font-bold">Worst</th>
+                        <th className="px-3 py-2.5 font-bold">Space</th>
+                        <th className="px-3 py-2.5 font-bold">Stable</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {comparisonAlgoIds.map((id) => {
+                        const comparisonAlgo = ALGORITHMS[id].info;
+                        return (
+                          <tr key={id} className="text-slate-700">
+                            <td className="px-3 py-3 font-semibold text-slate-900">
+                              <span className="mr-2 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: comparisonAlgo.color }} />
+                              {comparisonAlgo.name}
+                            </td>
+                            <td className="px-3 py-3 font-mono text-emerald-700">{comparisonAlgo.bestTime}</td>
+                            <td className="px-3 py-3 font-mono text-amber-700">{comparisonAlgo.avgTime}</td>
+                            <td className="px-3 py-3 font-mono text-rose-700">{comparisonAlgo.worstTime}</td>
+                            <td className="px-3 py-3 font-mono">{comparisonAlgo.space}</td>
+                            <td className="px-3 py-3">{comparisonAlgo.stable ? 'Yes' : 'No'}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="rounded-xl border border-indigo-100 bg-white p-4 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-900">Measured Work on Current Array</h3>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        {graphMetric === 'totalOps' ? 'Total operations' : graphMetric === 'comparisons' ? 'Comparisons' : 'Swaps / writes'} for N = {userN.toLocaleString()}
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600">Manual selection only</span>
+                  </div>
+                  <div className="space-y-2.5">
+                    {comparisonResults.map((result) => {
+                      const value = result[graphMetric] as number;
+                      const maximum = Math.max(...comparisonResults.map((entry) => entry[graphMetric] as number), 1);
+                      const percentage = Math.max(4, Math.round((value / maximum) * 100));
                       return (
-                        <tr key={id} className="text-slate-700">
-                          <td className="px-3 py-3 font-semibold text-slate-900">
-                            <span className="mr-2 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: comparisonAlgo.color }} />
-                            {comparisonAlgo.name}
-                          </td>
-                          <td className="px-3 py-3 font-mono text-emerald-700">{comparisonAlgo.bestTime}</td>
-                          <td className="px-3 py-3 font-mono text-amber-700">{comparisonAlgo.avgTime}</td>
-                          <td className="px-3 py-3 font-mono text-rose-700">{comparisonAlgo.worstTime}</td>
-                          <td className="px-3 py-3 font-mono">{comparisonAlgo.space}</td>
-                          <td className="px-3 py-3">{comparisonAlgo.stable ? 'Yes' : 'No'}</td>
-                        </tr>
+                        <div key={result.id} className="grid grid-cols-[minmax(105px,1fr)_minmax(120px,3fr)_auto] items-center gap-2 text-[11px]">
+                          <span className="truncate font-semibold text-slate-700">{result.name}</span>
+                          <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                            <div className="h-full rounded-full transition-[width] duration-300" style={{ width: `${percentage}%`, backgroundColor: result.color }} />
+                          </div>
+                          <span className="min-w-[58px] text-right font-mono font-bold text-slate-800">{value.toLocaleString()}</span>
+                        </div>
                       );
                     })}
-                  </tbody>
-                </table>
+                  </div>
+                </div>
               </div>
             )}
           </div>
