@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { UnifiedSortingDashboard } from './components/UnifiedSortingDashboard';
 import { ArrowUp, BarChart3, Cpu, Binary, Code2 } from 'lucide-react';
-import logoUrl from '../assets/favicon.svg';
+import { AnimatedLogo } from './components/AnimatedLogo';
 
 export default function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -23,7 +23,7 @@ export default function App() {
         <div className="mx-auto w-full max-w-[1800px] px-3 sm:px-4 lg:px-6 h-14 sm:h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-xs tracking-tight border border-slate-800 shadow-sm shrink-0">
-              <img src={logoUrl} alt="Sorting Algorithm Web App logo" className="h-full w-full rounded-xl" />
+              <AnimatedLogo className="h-full w-full rounded-xl" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap min-w-0">
