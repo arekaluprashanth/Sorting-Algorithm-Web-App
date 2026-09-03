@@ -165,6 +165,11 @@ export const UnifiedSortingDashboard: React.FC = () => {
   // Primary algorithm selection (supports all 15 algorithms)
   const [selectedAlgoId, setSelectedAlgoId] = useState<SupportedAlgorithmId>('bubbleSort');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [comparisonAlgoIds, setComparisonAlgoIds] = useState<SupportedAlgorithmId[]>([
+    'bubbleSort',
+    'quickSort',
+    'mergeSort',
+  ]);
   const selectedAlgo = ALGORITHMS[selectedAlgoId]?.info || ALGORITHMS.bubbleSort.info;
 
   // Custom Array Generation Controls & State (N up to 10,000)
@@ -784,6 +789,7 @@ export const UnifiedSortingDashboard: React.FC = () => {
 
   // Filtered algorithms list
   const filteredAlgoIds = useMemo(() => {
+    if (categoryFilter === 'compare') return ALL_ALGORITHM_IDS;
     if (categoryFilter === 'all') return ALL_ALGORITHM_IDS;
     if (categoryFilter === 'comparison') {
       return ALL_ALGORITHM_IDS.filter((id) => ALGORITHMS[id].info.category === 'comparison_based');
@@ -801,6 +807,14 @@ export const UnifiedSortingDashboard: React.FC = () => {
     }
     return ALL_ALGORITHM_IDS;
   }, [categoryFilter]);
+
+  const toggleComparisonAlgorithm = (id: SupportedAlgorithmId) => {
+    setComparisonAlgoIds((current) => {
+      if (current.includes(id)) return current.filter((algorithmId) => algorithmId !== id);
+      if (current.length >= 6) return current;
+      return [...current, id];
+    });
+  };
 
   return (
     <div className="w-full space-y-8 pb-16">
@@ -866,24 +880,40 @@ export const UnifiedSortingDashboard: React.FC = () => {
             >
               Hybrid
             </button>
+            <button
+              onClick={() => setCategoryFilter('compare')}
+              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+                categoryFilter === 'compare' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <ArrowDownUp className="w-3.5 h-3.5" />
+              Compare
+            </button>
           </div>
         </div>
 
         {/* Algorithm Badges Selector */}
         <div className="space-y-2">
-          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Select Algorithm to Inspect:
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              {categoryFilter === 'compare' ? 'Select Algorithms to Compare:' : 'Select Algorithm to Inspect:'}
+            </div>
+            {categoryFilter === 'compare' && (
+              <span className="text-[11px] font-semibold text-indigo-600">
+                {comparisonAlgoIds.length} selected · choose up to 6
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap gap-2">
             {filteredAlgoIds.map((id) => {
               const algo = ALGORITHMS[id].info;
-              const isSelected = selectedAlgoId === id;
+              const isSelected = categoryFilter === 'compare' ? comparisonAlgoIds.includes(id) : selectedAlgoId === id;
               return (
                 <motion.button
                   key={id}
                   id={`btn-algo-${id}`}
                   whileTap={{ scale: 0.96 }}
-                  onClick={() => setSelectedAlgoId(id)}
+                  onClick={() => categoryFilter === 'compare' ? toggleComparisonAlgorithm(id) : setSelectedAlgoId(id)}
                   className={`px-3 py-2 rounded-2xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
                     isSelected
                       ? 'bg-slate-900 text-white shadow-sm ring-2 ring-slate-900/10'
@@ -905,6 +935,62 @@ export const UnifiedSortingDashboard: React.FC = () => {
             })}
           </div>
         </div>
+
+        {categoryFilter === 'compare' && (
+          <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4 sm:p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Manual Algorithm Comparison</h2>
+                <p className="text-xs text-slate-600 mt-1">Select the algorithms above to compare their behavior side by side.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setComparisonAlgoIds([])}
+                className="self-start rounded-lg border border-indigo-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors"
+              >
+                Clear selection
+              </button>
+            </div>
+            {comparisonAlgoIds.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-indigo-200 bg-white/70 px-3 py-4 text-center text-xs text-slate-500">
+                Choose at least two algorithms above to start comparing.
+              </p>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-indigo-100 bg-white">
+                <table className="w-full min-w-[620px] text-left text-xs">
+                  <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
+                    <tr>
+                      <th className="px-3 py-2.5 font-bold">Algorithm</th>
+                      <th className="px-3 py-2.5 font-bold">Best</th>
+                      <th className="px-3 py-2.5 font-bold">Average</th>
+                      <th className="px-3 py-2.5 font-bold">Worst</th>
+                      <th className="px-3 py-2.5 font-bold">Space</th>
+                      <th className="px-3 py-2.5 font-bold">Stable</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {comparisonAlgoIds.map((id) => {
+                      const comparisonAlgo = ALGORITHMS[id].info;
+                      return (
+                        <tr key={id} className="text-slate-700">
+                          <td className="px-3 py-3 font-semibold text-slate-900">
+                            <span className="mr-2 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: comparisonAlgo.color }} />
+                            {comparisonAlgo.name}
+                          </td>
+                          <td className="px-3 py-3 font-mono text-emerald-700">{comparisonAlgo.bestTime}</td>
+                          <td className="px-3 py-3 font-mono text-amber-700">{comparisonAlgo.avgTime}</td>
+                          <td className="px-3 py-3 font-mono text-rose-700">{comparisonAlgo.worstTime}</td>
+                          <td className="px-3 py-3 font-mono">{comparisonAlgo.space}</td>
+                          <td className="px-3 py-3">{comparisonAlgo.stable ? 'Yes' : 'No'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 2. CUSTOM ARRAY GENERATION CONTROLS (N numbers, Random, Even, Odd, Prime based on user wish) */}
         <div className="pt-6 border-t border-slate-100 space-y-4">
