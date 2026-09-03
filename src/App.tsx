@@ -11,22 +11,22 @@ export default function App() {
     if (!favicon) return;
 
     const frames = [
-      [18, 34, 43, 27],
-      [27, 18, 34, 43],
-      [43, 27, 18, 34],
-      [34, 43, 27, 18],
+      [12, 21, 32],
+      [18, 14, 25],
+      [25, 18, 14],
+      [16, 28, 20],
     ];
     let frameIndex = 0;
     const updateFavicon = () => {
       const heights = frames[frameIndex];
       const bars = heights.map((height, index) => {
-        const x = index === 3 ? 48 : 12 + index * 12;
-        const width = index === 3 ? 5 : 8;
+        const x = 12 + index * 15;
+        const width = 10;
         const y = 52 - height;
-        const colors = ['#6366f1', '#22c55e', '#f59e0b', '#f43f5e'];
+        const colors = ['#38bdf8', '#34d399', '#fbbf24'];
         return `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="2" fill="${colors[index]}"/>`;
       }).join('');
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f172a"/>${bars}<path d="M10 54h44" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".8"/></svg>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f172a"/>${bars}<path d="M12 53h40M43 13h9l-4 4" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
       favicon.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
       frameIndex = (frameIndex + 1) % frames.length;
     };

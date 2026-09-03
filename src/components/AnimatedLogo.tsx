@@ -13,11 +13,10 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({ className = '' }) =>
   >
     <rect width="64" height="64" rx="14" fill="#0f172a" />
     <g className="animated-logo-bars">
-      <rect x="12" y="34" width="8" height="18" rx="2" fill="#6366f1" />
-      <rect x="24" y="25" width="8" height="27" rx="2" fill="#22c55e" />
-      <rect x="36" y="16" width="8" height="36" rx="2" fill="#f59e0b" />
-      <rect x="48" y="9" width="5" height="43" rx="2" fill="#f43f5e" />
+      <rect x="12" y="40" width="10" height="12" rx="3" fill="#38bdf8" />
+      <rect x="27" y="31" width="10" height="21" rx="3" fill="#34d399" />
+      <rect x="42" y="20" width="10" height="32" rx="3" fill="#fbbf24" />
     </g>
-    <path className="animated-logo-sweep" d="M10 53h44" stroke="#fff" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+    <path className="animated-logo-sweep" d="M12 53h40M43 13l9 0-4 4" fill="none" stroke="#fb7185" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
