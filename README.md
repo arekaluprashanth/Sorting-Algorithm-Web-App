@@ -1,57 +1,37 @@
 # Sorting Algoritm Web App
 
-Sorting Algoritm Web App is an interactive web app for learning and comparing sorting algorithms. It combines step-by-step visualizations, execution metrics, complexity analysis, benchmarking, and generated implementations in C++, Python, and Java.
+Sorting Algoritm Web App is an interactive learning environment for understanding how sorting algorithms behave. It turns abstract algorithm steps into clear visual motion, measurable results, and practical comparisons that are easy to explore.
 
-## Features
+## What It Offers
 
-- Explore 15 sorting algorithms, including comparison, divide-and-conquer, non-comparison, and hybrid methods.
-- Enter custom arrays or generate random, even, odd, prime, sorted, reversed, and nearly sorted data.
-- Play, pause, step through, loop, and inspect algorithm execution traces.
-- Compare comparisons, swaps, operation counts, and measured benchmark results.
-- Review best, average, and worst-case time complexity and space usage.
-- Inspect pseudocode and download execution traces as JSON, CSV, Markdown, or text.
-- Use the responsive interface on desktop, tablet, and mobile devices.
+The app brings together a complete view of sorting performance in one focused workspace:
 
-## Tech Stack
+- Explore 15 well-known sorting algorithms across multiple algorithm families.
+- Watch each operation unfold through a step-by-step execution visualizer.
+- Use custom number sequences or generate data with different patterns and distributions.
+- Compare comparisons, swaps, shifts, operation totals, and observed performance.
+- Understand best-case, average-case, and worst-case behavior through interactive complexity views.
+- Read algorithm explanations, pseudocode, execution traces, and implementation logic.
+- Export results and traces for review, teaching, documentation, or further analysis.
 
-- React 19 and TypeScript
-- Vite
-- Tailwind CSS
-- Recharts
-- Lucide React
+## Built For Learning
 
-## Run Locally
+The app is designed for students, educators, interview preparation, and anyone who wants a more intuitive understanding of algorithm performance. Instead of presenting complexity as isolated formulas, it connects theory with visible execution and empirical evidence.
 
-**Prerequisites:** Node.js 18 or newer
+Users can move from a high-level comparison to individual operations, inspect why an algorithm makes a decision, and see how input order changes the work required to produce a sorted result.
 
-1. Install dependencies:
+## A Clear View Of Complexity
 
-   ```bash
-   npm install
-   ```
+Sorting Algoritm Web App helps make important algorithm concepts easier to recognize:
 
-2. Start the development server:
+- How repeated comparisons affect runtime
+- Why swaps and shifts vary between algorithms
+- How divide-and-conquer changes the shape of execution
+- How input size and input order influence performance
+- Why theoretical complexity and measured operations should be considered together
 
-   ```bash
-   npm run dev
-   ```
+## Designed For Exploration
 
-3. Open http://localhost:3000 in your browser.
+The interface supports quick experimentation without requiring users to switch between separate tools. Visual traces, metrics, charts, algorithm facts, and source-level explanations are presented as connected parts of the same learning experience.
 
-## Available Scripts
-
-```bash
-npm run dev       # Start the Vite development server
-npm run build     # Create a production build
-npm run preview   # Preview the production build locally
-npm run lint      # Run the TypeScript check
-```
-
-## Project Structure
-
-```text
-src/
-  algorithms/     Sorting implementations and simulation generators
-  components/     Dashboard, visualizer, charts, benchmark, and table views
-  utils/          Array generators, complexity helpers, and code generation
-```
+The responsive design makes the app suitable for desktop study, classroom demonstrations, presentations, and mobile reference.
