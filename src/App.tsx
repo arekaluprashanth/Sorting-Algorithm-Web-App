@@ -7,6 +7,39 @@ export default function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
+    const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (!favicon) return;
+
+    const frames = [
+      [18, 34, 43, 27],
+      [27, 18, 34, 43],
+      [43, 27, 18, 34],
+      [34, 43, 27, 18],
+    ];
+    let frameIndex = 0;
+    const updateFavicon = () => {
+      const heights = frames[frameIndex];
+      const bars = heights.map((height, index) => {
+        const x = index === 3 ? 48 : 12 + index * 12;
+        const width = index === 3 ? 5 : 8;
+        const y = 52 - height;
+        const colors = ['#6366f1', '#22c55e', '#f59e0b', '#f43f5e'];
+        return `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="2" fill="${colors[index]}"/>`;
+      }).join('');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f172a"/>${bars}<path d="M10 54h44" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".8"/></svg>`;
+      favicon.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+      frameIndex = (frameIndex + 1) % frames.length;
+    };
+
+    updateFavicon();
+    const timer = window.setInterval(updateFavicon, 420);
+    return () => {
+      window.clearInterval(timer);
+      favicon.href = '/assets/favicon.svg';
+    };
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 480);
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });

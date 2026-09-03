@@ -105,7 +105,7 @@ main > div > section {
 .animated-logo-bars rect {
   transform-box: fill-box;
   transform-origin: center bottom;
-  animation: logo-sort 1.8s ease-in-out infinite alternate;
+  animation: logo-sort 1.4s ease-in-out infinite alternate;
 }
 
 .animated-logo-bars rect:nth-child(2) {
@@ -121,8 +121,8 @@ main > div > section {
 }
 
 .animated-logo-sweep {
-  stroke-dasharray: 8 42;
-  animation: logo-sweep 1.8s ease-in-out infinite;
+  stroke-dasharray: 10 40;
+  animation: logo-sweep 1.4s ease-in-out infinite;
 }
 
 @keyframes logo-sort {
@@ -132,5 +132,5 @@ main > div > section {
 
 @keyframes logo-sweep {
   0% { stroke-dashoffset: 50; opacity: 0.15; }
-  55%, 100% { stroke-dashoffset: 0; opacity: 0.75; }
+  55%, 100% { stroke-dashoffset: 0; opacity: 0.9; }
 }
