@@ -509,15 +509,40 @@ export const UnifiedSortingDashboard: React.FC = () => {
       [150, contentWidth - 150]
     );
 
-    addSectionTitle('Performance on This Input');
+    addSectionTitle('Report Scope and Selections');
     addTable(
-      ['Algorithm', 'Comparisons', 'Swaps / shifts', 'Total operations'],
-      userArrayAlgoResults
-        .slice()
-        .sort((a, b) => a.totalOps - b.totalOps)
-        .map((result) => [result.name, result.comparisons.toLocaleString(), result.swaps.toLocaleString(), result.totalOps.toLocaleString()]),
-      [170, 105, 105, contentWidth - 380]
+      ['Selection', 'Details'],
+      [
+        ['Active algorithm', selectedAlgo.name],
+        ['Source language', LANGUAGE_TABS.find((tab) => tab.id === selectedLang)?.label || selectedLang],
+        ['Graph metric', graphMetric === 'totalOps' ? 'Total operations' : graphMetric === 'comparisons' ? 'Comparisons' : 'Swaps / writes'],
+        ['Comparison set', comparisonAlgoIds.length > 0 ? comparisonAlgoIds.map((id) => ALGORITHMS[id].info.name).join(', ') : 'No manual comparison set selected'],
+        ['Report contents', 'Input, array analysis, algorithm profile, selected logic, pseudocode, source code, current step, and execution trace'],
+      ],
+      [125, contentWidth - 125]
     );
+
+    if (comparisonAlgoIds.length >= 2) {
+      const selectedComparisonResults = comparisonAlgoIds
+        .map((id) => userArrayAlgoResults.find((result) => result.id === id))
+        .filter((result): result is typeof userArrayAlgoResults[number] => Boolean(result))
+        .sort((a, b) => a.totalOps - b.totalOps);
+      addSectionTitle('Selected Comparison Insights');
+      addTable(
+        ['Result', 'Algorithm', 'Measured operations'],
+        comparisonAlgoIds.length === 2
+          ? [
+              ['Best', selectedComparisonResults[0]?.name || 'Unavailable', selectedComparisonResults[0]?.totalOps.toLocaleString() || '0'],
+              ['Worst', selectedComparisonResults[1]?.name || 'Unavailable', selectedComparisonResults[1]?.totalOps.toLocaleString() || '0'],
+            ]
+          : [
+              ['Best', selectedComparisonResults[0]?.name || 'Unavailable', selectedComparisonResults[0]?.totalOps.toLocaleString() || '0'],
+              ['Average', selectedComparisonResults[Math.floor(selectedComparisonResults.length / 2)]?.name || 'Unavailable', selectedComparisonResults[Math.floor(selectedComparisonResults.length / 2)]?.totalOps.toLocaleString() || '0'],
+              ['Worst', selectedComparisonResults[selectedComparisonResults.length - 1]?.name || 'Unavailable', selectedComparisonResults[selectedComparisonResults.length - 1]?.totalOps.toLocaleString() || '0'],
+            ],
+        [100, 220, contentWidth - 320]
+      );
+    }
 
     ensureSpace(70);
     const metricCards = [
@@ -549,6 +574,31 @@ export const UnifiedSortingDashboard: React.FC = () => {
     addSectionTitle('Pseudocode');
     (selectedAlgo.pseudocode || []).forEach((line, index) => {
       addWrappedText(`${index + 1}.  ${line}`, 8, [51, 65, 85]);
+    });
+
+    addSectionTitle(`${LANGUAGE_TABS.find((tab) => tab.id === selectedLang)?.label || selectedLang} Implementation and Logic`);
+    addWrappedText(languageData[selectedLang]?.logic.title || 'Selected implementation overview', 11, [15, 23, 42]);
+    addWrappedText(languageData[selectedLang]?.logic.summary || 'This section describes the selected implementation for the current algorithm.', 9);
+    (languageData[selectedLang]?.logic.steps || []).forEach((step, index) => {
+      addWrappedText(`${index + 1}. ${step.heading}`, 9, [15, 23, 42]);
+      addWrappedText(step.description, 8, [71, 85, 105]);
+      addWrappedText(`Code: ${step.codeSnippet}`, 8, [51, 65, 85]);
+    });
+
+    addSectionTitle(`Selected Source Code (${LANGUAGE_TABS.find((tab) => tab.id === selectedLang)?.label || selectedLang})`);
+    const sourceCode = languageData[selectedLang]?.code || 'Source code is unavailable for this selection.';
+    sourceCode.split('\n').forEach((line, index) => {
+      const codeLines = doc.splitTextToSize(`${String(index + 1).padStart(3, ' ')}  ${line || ' '}`, contentWidth - 14);
+      ensureSpace(codeLines.length * 10 + 6);
+      if (index % 2 === 0) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y - 8, contentWidth, codeLines.length * 10 + 6, 'F');
+      }
+      doc.setFont('courier', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(51, 65, 85);
+      doc.text(codeLines, margin + 7, y);
+      y += codeLines.length * 10 + 3;
     });
 
     addSectionTitle('Execution Trace');
