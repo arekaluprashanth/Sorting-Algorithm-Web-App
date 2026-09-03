@@ -822,6 +822,23 @@ export const UnifiedSortingDashboard: React.FC = () => {
       .filter((result): result is typeof userArrayAlgoResults[number] => Boolean(result));
   }, [comparisonAlgoIds, userArrayAlgoResults]);
 
+  const comparisonCurveData = useMemo(() => {
+    const quadraticAlgorithms: SupportedAlgorithmId[] = ['bubbleSort', 'selectionSort', 'insertionSort', 'cocktailSort', 'gnomeSort'];
+    const linearAlgorithms: SupportedAlgorithmId[] = ['countingSort', 'radixSort', 'bucketSort'];
+    const shellAlgorithms: SupportedAlgorithmId[] = ['shellSort'];
+
+    return growthCurveData.map((point) => {
+      const curvePoint: Record<string, number> = { n: point.n };
+      comparisonAlgoIds.forEach((id) => {
+        if (quadraticAlgorithms.includes(id)) curvePoint[id] = point.nSquared;
+        else if (linearAlgorithms.includes(id)) curvePoint[id] = point.linear;
+        else if (shellAlgorithms.includes(id)) curvePoint[id] = point.nFourThirds;
+        else curvePoint[id] = point.nLogN;
+      });
+      return curvePoint;
+    });
+  }, [comparisonAlgoIds, growthCurveData]);
+
   return (
     <div className="w-full space-y-8 pb-16">
       {/* 1. TOP HEADER & ALGORITHM SELECTOR (ALL 15 ALGORITHMS) */}
@@ -2233,62 +2250,52 @@ export const UnifiedSortingDashboard: React.FC = () => {
               })()}
             </div>
 
-            {/* Bar Chart with Rich Legibility */}
+            {/* Selected algorithm comparison chart */}
             <div className="h-[280px] w-full pt-1">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={userArrayAlgoResults} margin={{ top: 15, right: 10, left: -10, bottom: 45 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 10, fill: '#334155', fontWeight: 500 }}
-                    interval={0}
-                    angle={-40}
-                    textAnchor="end"
-                    height={50}
-                  />
-                  <YAxis tick={{ fontSize: 10, fill: '#64748B' }} width={40} />
-                  <Tooltip
-                    cursor={{ fill: 'rgba(99, 102, 241, 0.08)' }}
-                    contentStyle={{
-                      backgroundColor: '#0F172A',
-                      borderColor: '#334155',
-                      borderRadius: '0.75rem',
-                      color: '#F8FAFC',
-                      fontSize: '12px',
-                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-                    }}
-                    formatter={(value: any, name: any, item: any) => [
-                      `${Number(value).toLocaleString()} ${graphMetric === 'totalOps' ? 'total operations' : graphMetric === 'comparisons' ? 'comparisons' : 'swaps'}`,
-                      item.payload.name
-                    ]}
-                  />
-                  <Bar
-                    dataKey={graphMetric}
-                    radius={[6, 6, 0, 0]}
-                    fill="#4F46E5"
-                    onClick={(entry: any) => {
-                      if (entry?.id) setSelectedAlgoId(entry.id);
-                    }}
-                    className="cursor-pointer hover:opacity-90 transition-opacity"
-                  >
-                    {userArrayAlgoResults.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={entry.id === selectedAlgoId ? '#4F46E5' : entry.color || '#6366F1'}
-                        stroke={entry.id === selectedAlgoId ? '#1E1B4B' : 'transparent'}
-                        strokeWidth={entry.id === selectedAlgoId ? 2 : 0}
-                      />
+              {categoryFilter === 'compare' ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={comparisonCurveData} margin={{ top: 15, right: 15, left: -10, bottom: 10 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis dataKey="n" type="number" tick={{ fontSize: 10, fill: '#64748B' }} label={{ value: 'Array Size (N)', position: 'insideBottom', offset: -4, fontSize: 10, fill: '#94A3B8' }} />
+                    <YAxis tick={{ fontSize: 10, fill: '#64748B' }} width={45} label={{ value: graphMetric === 'totalOps' ? 'Operations' : graphMetric === 'comparisons' ? 'Comparisons' : 'Swaps', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#94A3B8' }} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '0.75rem', color: '#F8FAFC', fontSize: '11px' }}
+                      formatter={(value: any, name: any) => [`${Number(value).toLocaleString()} ${graphMetric === 'totalOps' ? 'ops' : graphMetric}`, ALGORITHMS[name as SupportedAlgorithmId]?.info.name || name]}
+                      labelFormatter={(label) => `Array size N = ${Number(label).toLocaleString()}`}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '4px' }} formatter={(value) => ALGORITHMS[value as SupportedAlgorithmId]?.info.name || value} />
+                    <ReferenceLine x={userN} stroke="#EC4899" strokeDasharray="3 3" label={{ value: `Your N=${userN}`, fill: '#EC4899', fontSize: 10 }} />
+                    {comparisonAlgoIds.map((id) => (
+                      <Line key={id} type="monotone" dataKey={id} name={id} stroke={ALGORITHMS[id].info.color} strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
                     ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={userArrayAlgoResults} margin={{ top: 15, right: 10, left: -10, bottom: 45 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#334155', fontWeight: 500 }} interval={0} angle={-40} textAnchor="end" height={50} />
+                    <YAxis tick={{ fontSize: 10, fill: '#64748B' }} width={40} />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(99, 102, 241, 0.08)' }}
+                      contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '0.75rem', color: '#F8FAFC', fontSize: '12px' }}
+                      formatter={(value: any, name: any, item: any) => [`${Number(value).toLocaleString()} ${graphMetric === 'totalOps' ? 'total operations' : graphMetric === 'comparisons' ? 'comparisons' : 'swaps'}`, item.payload.name]}
+                    />
+                    <Bar dataKey={graphMetric} radius={[6, 6, 0, 0]} fill="#4F46E5" onClick={(entry: any) => { if (entry?.id) setSelectedAlgoId(entry.id); }} className="cursor-pointer hover:opacity-90 transition-opacity">
+                      {userArrayAlgoResults.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.id === selectedAlgoId ? '#4F46E5' : entry.color || '#6366F1'} stroke={entry.id === selectedAlgoId ? '#1E1B4B' : 'transparent'} strokeWidth={entry.id === selectedAlgoId ? 2 : 0} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
             {/* Click to Select Tip */}
             <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
               <span className="flex items-center gap-1 text-indigo-600 font-medium">
                 <Sparkles className="w-3 h-3" />
-                <span>Click any bar or algorithm to switch visual simulation</span>
+                <span>{categoryFilter === 'compare' ? 'Each line represents a selected algorithm across array sizes' : 'Click any bar or algorithm to switch visual simulation'}</span>
               </span>
               <span className="font-mono text-slate-400">Current N = {userN}</span>
             </div>
