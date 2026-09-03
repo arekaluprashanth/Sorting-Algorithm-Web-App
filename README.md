@@ -1,20 +1,57 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# SortBench
 
-# Run and deploy your AI Studio app
+SortBench is an interactive web app for learning and comparing sorting algorithms. It combines step-by-step visualizations, execution metrics, complexity analysis, benchmarking, and generated implementations in C++, Python, and Java.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/d2343810-4d20-4385-a02a-071d99f25dce
+- Explore 15 sorting algorithms, including comparison, divide-and-conquer, non-comparison, and hybrid methods.
+- Enter custom arrays or generate random, even, odd, prime, sorted, reversed, and nearly sorted data.
+- Play, pause, step through, loop, and inspect algorithm execution traces.
+- Compare comparisons, swaps, operation counts, and measured benchmark results.
+- Review best, average, and worst-case time complexity and space usage.
+- Inspect pseudocode and download execution traces as JSON, CSV, Markdown, or text.
+- Use the responsive interface on desktop, tablet, and mobile devices.
+
+## Tech Stack
+
+- React 19 and TypeScript
+- Vite
+- Tailwind CSS
+- Recharts
+- Lucide React
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js 18 or newer
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+
+   ```bash
+   npm install
+   ```
+
+2. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+3. Open http://localhost:3000 in your browser.
+
+## Available Scripts
+
+```bash
+npm run dev       # Start the Vite development server
+npm run build     # Create a production build
+npm run preview   # Preview the production build locally
+npm run lint      # Run the TypeScript check
+```
+
+## Project Structure
+
+```text
+src/
+  algorithms/     Sorting implementations and simulation generators
+  components/     Dashboard, visualizer, charts, benchmark, and table views
+  utils/          Array generators, complexity helpers, and code generation
+```
