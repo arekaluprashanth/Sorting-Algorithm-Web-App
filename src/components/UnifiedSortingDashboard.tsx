@@ -833,6 +833,34 @@ export const UnifiedSortingDashboard: React.FC = () => {
     });
   }, [appliedArray, comparisonAlgoIds, graphMetric, userArrayAlgoResults]);
 
+  const comparisonRanking = useMemo(() => {
+    const selectedResults = comparisonAlgoIds
+      .map((id) => userArrayAlgoResults.find((entry) => entry.id === id))
+      .filter((result): result is typeof userArrayAlgoResults[number] => Boolean(result))
+      .sort((a, b) => (a[graphMetric] as number) - (b[graphMetric] as number));
+
+    if (selectedResults.length < 2) return [];
+    if (selectedResults.length === 2) {
+      return [
+        { label: 'Best', result: selectedResults[0], tone: 'emerald' },
+        { label: 'Worst', result: selectedResults[1], tone: 'rose' },
+      ];
+    }
+
+    const mean = selectedResults.reduce((total, result) => total + (result[graphMetric] as number), 0) / selectedResults.length;
+    const average = selectedResults.reduce((closest, result) => {
+      const currentDistance = Math.abs((result[graphMetric] as number) - mean);
+      const closestDistance = Math.abs((closest[graphMetric] as number) - mean);
+      return currentDistance < closestDistance ? result : closest;
+    });
+
+    return [
+      { label: 'Best', result: selectedResults[0], tone: 'emerald' },
+      { label: 'Average', result: average, tone: 'amber' },
+      { label: 'Worst', result: selectedResults[selectedResults.length - 1], tone: 'rose' },
+    ];
+  }, [comparisonAlgoIds, graphMetric, userArrayAlgoResults]);
+
   return (
     <div className="w-full space-y-8 pb-16">
       {/* 1. TOP HEADER & ALGORITHM SELECTOR (ALL 15 ALGORITHMS) */}
@@ -2148,7 +2176,7 @@ export const UnifiedSortingDashboard: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
                     <BarChart3 className="w-4 h-4 text-indigo-600" />
-                    <span>{categoryFilter === 'compare' ? 'Operations Across Entered Array Elements' : `Live Operations on Your Array (N = ${userN.toLocaleString()})`}</span>
+                    <span>{categoryFilter === 'compare' ? 'Selected Algorithm Performance by Input Value' : `Live Operations on Your Array (N = ${userN.toLocaleString()})`}</span>
                   </h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60 font-mono">
                     Real Counts
@@ -2160,6 +2188,30 @@ export const UnifiedSortingDashboard: React.FC = () => {
               </div>
 
             </div>
+
+            {categoryFilter === 'compare' && comparisonRanking.length > 0 && (
+              <div className={`grid grid-cols-1 ${comparisonRanking.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} gap-3`}>
+                {comparisonRanking.map(({ label, result, tone }) => {
+                  const toneClasses = {
+                    emerald: 'border-emerald-200 bg-emerald-50/70 text-emerald-700',
+                    amber: 'border-amber-200 bg-amber-50/70 text-amber-700',
+                    rose: 'border-rose-200 bg-rose-50/70 text-rose-700',
+                  }[tone];
+                  return (
+                    <div key={`${label}-${result.id}`} className={`rounded-xl border p-3 ${toneClasses}`}>
+                      <div className="text-[10px] font-bold uppercase tracking-[0.16em]">{label} result</div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: result.color }} />
+                        <span className="truncate text-xs font-bold text-slate-900">{result.name}</span>
+                      </div>
+                      <div className="mt-1 font-mono text-sm font-extrabold text-slate-900">
+                        {(result[graphMetric] as number).toLocaleString()} {graphMetric === 'totalOps' ? 'operations' : graphMetric}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Selected algorithm comparison chart */}
             <div className="h-[280px] w-full pt-1">
