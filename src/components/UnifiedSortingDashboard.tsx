@@ -816,12 +816,6 @@ export const UnifiedSortingDashboard: React.FC = () => {
     });
   };
 
-  const comparisonResults = useMemo(() => {
-    return comparisonAlgoIds
-      .map((id) => userArrayAlgoResults.find((result) => result.id === id))
-      .filter((result): result is typeof userArrayAlgoResults[number] => Boolean(result));
-  }, [comparisonAlgoIds, userArrayAlgoResults]);
-
   const comparisonCurveData = useMemo(() => {
     const quadraticAlgorithms: SupportedAlgorithmId[] = ['bubbleSort', 'selectionSort', 'insertionSort', 'cocktailSort', 'gnomeSort'];
     const linearAlgorithms: SupportedAlgorithmId[] = ['countingSort', 'radixSort', 'bucketSort'];
@@ -1013,33 +1007,6 @@ export const UnifiedSortingDashboard: React.FC = () => {
                   </table>
                 </div>
 
-                <div className="rounded-xl border border-indigo-100 bg-white p-4 space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <h3 className="text-xs font-bold text-slate-900">Measured Work on Current Array</h3>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        {graphMetric === 'totalOps' ? 'Total operations' : graphMetric === 'comparisons' ? 'Comparisons' : 'Swaps / writes'} for N = {userN.toLocaleString()}
-                      </p>
-                    </div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600">Manual selection only</span>
-                  </div>
-                  <div className="space-y-2.5">
-                    {comparisonResults.map((result) => {
-                      const value = result[graphMetric] as number;
-                      const maximum = Math.max(...comparisonResults.map((entry) => entry[graphMetric] as number), 1);
-                      const percentage = Math.max(4, Math.round((value / maximum) * 100));
-                      return (
-                        <div key={result.id} className="grid grid-cols-[minmax(105px,1fr)_minmax(120px,3fr)_auto] items-center gap-2 text-[11px]">
-                          <span className="truncate font-semibold text-slate-700">{result.name}</span>
-                          <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-                            <div className="h-full rounded-full transition-[width] duration-300" style={{ width: `${percentage}%`, backgroundColor: result.color }} />
-                          </div>
-                          <span className="min-w-[58px] text-right font-mono font-bold text-slate-800">{value.toLocaleString()}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
               </div>
             )}
           </div>
