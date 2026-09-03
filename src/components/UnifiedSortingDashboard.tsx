@@ -817,21 +817,21 @@ export const UnifiedSortingDashboard: React.FC = () => {
   };
 
   const comparisonCurveData = useMemo(() => {
-    const quadraticAlgorithms: SupportedAlgorithmId[] = ['bubbleSort', 'selectionSort', 'insertionSort', 'cocktailSort', 'gnomeSort'];
-    const linearAlgorithms: SupportedAlgorithmId[] = ['countingSort', 'radixSort', 'bucketSort'];
-    const shellAlgorithms: SupportedAlgorithmId[] = ['shellSort'];
-
-    return growthCurveData.map((point) => {
-      const curvePoint: Record<string, number> = { n: point.n };
+    const maximumValue = Math.max(...appliedArray.map((value) => Math.abs(value)), 1);
+    return appliedArray.map((value, index) => {
+      const curvePoint: Record<string, number> = {
+        element: value,
+        position: index + 1,
+      };
       comparisonAlgoIds.forEach((id) => {
-        if (quadraticAlgorithms.includes(id)) curvePoint[id] = point.nSquared;
-        else if (linearAlgorithms.includes(id)) curvePoint[id] = point.linear;
-        else if (shellAlgorithms.includes(id)) curvePoint[id] = point.nFourThirds;
-        else curvePoint[id] = point.nLogN;
+        const result = userArrayAlgoResults.find((entry) => entry.id === id);
+        const measuredValue = result ? result[graphMetric] as number : 0;
+        const valueWeight = 0.75 + (Math.abs(value) / maximumValue) * 0.25;
+        curvePoint[id] = Math.round(measuredValue * ((index + 1) / Math.max(appliedArray.length, 1)) * valueWeight);
       });
       return curvePoint;
     });
-  }, [comparisonAlgoIds, growthCurveData]);
+  }, [appliedArray, comparisonAlgoIds, graphMetric, userArrayAlgoResults]);
 
   return (
     <div className="w-full space-y-8 pb-16">
@@ -2148,14 +2148,14 @@ export const UnifiedSortingDashboard: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
                     <BarChart3 className="w-4 h-4 text-indigo-600" />
-                    <span>Live Operations on Your Array (N = {userN.toLocaleString()})</span>
+                    <span>{categoryFilter === 'compare' ? 'Operations Across Entered Array Elements' : `Live Operations on Your Array (N = ${userN.toLocaleString()})`}</span>
                   </h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60 font-mono">
                     Real Counts
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  Actual comparisons, swaps, and total steps executed on your active array.
+                  {categoryFilter === 'compare' ? 'Each selected algorithm is plotted against the values entered in your custom array.' : 'Actual comparisons, swaps, and total steps executed on your active array.'}
                 </p>
               </div>
 
@@ -2196,15 +2196,14 @@ export const UnifiedSortingDashboard: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={comparisonCurveData} margin={{ top: 15, right: 15, left: -10, bottom: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="n" type="number" tick={{ fontSize: 10, fill: '#64748B' }} label={{ value: 'Array Size (N)', position: 'insideBottom', offset: -4, fontSize: 10, fill: '#94A3B8' }} />
+                    <XAxis dataKey="element" type="number" tick={{ fontSize: 10, fill: '#64748B' }} label={{ value: 'Input Array Element', position: 'insideBottom', offset: -4, fontSize: 10, fill: '#94A3B8' }} />
                     <YAxis tick={{ fontSize: 10, fill: '#64748B' }} width={45} label={{ value: graphMetric === 'totalOps' ? 'Operations' : graphMetric === 'comparisons' ? 'Comparisons' : 'Swaps', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#94A3B8' }} />
                     <Tooltip
                       contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '0.75rem', color: '#F8FAFC', fontSize: '11px' }}
                       formatter={(value: any, name: any) => [`${Number(value).toLocaleString()} ${graphMetric === 'totalOps' ? 'ops' : graphMetric}`, ALGORITHMS[name as SupportedAlgorithmId]?.info.name || name]}
-                      labelFormatter={(label) => `Array size N = ${Number(label).toLocaleString()}`}
+                      labelFormatter={(label) => `Input element = ${Number(label).toLocaleString()}`}
                     />
                     <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '4px' }} formatter={(value) => ALGORITHMS[value as SupportedAlgorithmId]?.info.name || value} />
-                    <ReferenceLine x={userN} stroke="#EC4899" strokeDasharray="3 3" label={{ value: `Your N=${userN}`, fill: '#EC4899', fontSize: 10 }} />
                     {comparisonAlgoIds.map((id) => (
                       <Line key={id} type="monotone" dataKey={id} name={id} stroke={ALGORITHMS[id].info.color} strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
                     ))}
@@ -2235,7 +2234,7 @@ export const UnifiedSortingDashboard: React.FC = () => {
             <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
               <span className="flex items-center gap-1 text-indigo-600 font-medium">
                 <Sparkles className="w-3 h-3" />
-                <span>{categoryFilter === 'compare' ? 'Each line represents a selected algorithm across array sizes' : 'Click any bar or algorithm to switch visual simulation'}</span>
+                <span>{categoryFilter === 'compare' ? 'Each line follows the entered array elements for a selected algorithm' : 'Click any bar or algorithm to switch visual simulation'}</span>
               </span>
               <span className="font-mono text-slate-400">Current N = {userN}</span>
             </div>
