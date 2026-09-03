@@ -76,6 +76,7 @@
 main > div > section {
   content-visibility: auto;
   contain-intrinsic-size: 760px;
+  scroll-margin-top: 4.5rem;
 }
 
 ::-webkit-scrollbar {

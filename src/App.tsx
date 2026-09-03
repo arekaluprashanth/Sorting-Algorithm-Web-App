@@ -18,7 +18,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen w-full bg-slate-50/90 text-slate-900 flex flex-col font-sans selection:bg-indigo-600 selection:text-white min-w-0">
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white flex-shrink-0">
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200/80 bg-white flex-shrink-0">
         <div className="mx-auto w-full max-w-[1800px] px-3 sm:px-4 lg:px-6 h-14 sm:h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-xs tracking-tight border border-slate-800 shadow-sm shrink-0">
@@ -64,7 +64,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 w-full min-w-0">
+      <main className="flex-1 w-full min-w-0 pt-14 sm:pt-16">
         <div className="mx-auto w-full max-w-[1800px] min-h-full px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
           <UnifiedSortingDashboard />
         </div>
