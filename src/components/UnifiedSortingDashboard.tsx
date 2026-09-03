@@ -2159,33 +2159,6 @@ export const UnifiedSortingDashboard: React.FC = () => {
                 </p>
               </div>
 
-              {/* View Switcher: Bar Chart vs Ranked Table */}
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
-                <button
-                  onClick={() => setGraphMetric('totalOps')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] ${
-                    graphMetric === 'totalOps' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Total Work
-                </button>
-                <button
-                  onClick={() => setGraphMetric('comparisons')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] ${
-                    graphMetric === 'comparisons' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Comparisons
-                </button>
-                <button
-                  onClick={() => setGraphMetric('swaps')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] ${
-                    graphMetric === 'swaps' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Swaps
-                </button>
-              </div>
             </div>
 
             {/* Quick Leaderboard Highlights */}
