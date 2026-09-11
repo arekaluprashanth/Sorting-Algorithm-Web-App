@@ -1,0 +1,483 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: light;
+    font-family: Inter, "Segoe UI", sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-padding-top: 4rem;
+    background: #f8fafc;
+  }
+
+  body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: visible;
+    background: #f8fafc;
+    color: #0f172a;
+    touch-action: pan-y pinch-zoom;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+    font-family: Inter, "Segoe UI", sans-serif;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  a, button, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  code, pre, kbd, samp {
+    font-family: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+  }
+
+  @media (max-width: 640px) {
+    html {
+      font-size: 15px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Performance Optimizations for 165Hz Refresh Rate */
+@layer utilities {
+  /* GPU Acceleration Classes */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform, opacity;
+  }
+
+  .gpu-accelerated-3d {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform, opacity;
+  }
+
+  /* Optimized Animation Classes */
+  .animate-smooth-60 {
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    animation-fill-mode: both;
+  }
+
+  .animate-smooth-165 {
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+  }
+
+  /* Reduce Layout Thrashing */
+  .contain-layout {
+    contain: layout style paint;
+  }
+
+  .contain-strict {
+    contain: strict;
+  }
+
+  /* Optimized Scrolling */
+  .scroll-smooth-165 {
+    scroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Hardware Accelerated Transforms */
+  .transform-gpu {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .transform-gpu-3d {
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  /* Optimized Opacity Animations */
+  .opacity-gpu {
+    will-change: opacity;
+    transform: translateZ(0);
+  }
+
+  /* Content Visibility for Off-screen Elements */
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1000px;
+  }
+
+  /* Reduce Paint Area */
+  .paint-optimized {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+  }
+
+  /* Disable Animations for Performance */
+  .no-animation *,
+  .no-animation *::before,
+  .no-animation *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+main > div > section {
+  scroll-margin-top: 4.5rem;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.42);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.65);
+}
+
+.gpu-boost {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+.animated-logo-nodes {
+  transform-origin: 32px 32px;
+  animation: logo-orbit 2.4s linear infinite;
+}
+
+.animated-logo-orbit {
+  animation: logo-pulse 1.8s ease-in-out infinite alternate;
+}
+
+.animated-logo-sweep {
+  animation: logo-cross 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes logo-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes logo-pulse {
+  from { opacity: 0.45; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes logo-cross {
+  from { opacity: 0.35; transform: rotate(0deg) scale(0.8); }
+  to { opacity: 1; transform: rotate(90deg) scale(1); }
+}
+
+/* High Performance Animation Keyframes - Optimized for 165Hz */
+@keyframes fade-in-fast {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up-fast {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-gpu {
+  0%, 100% { opacity: 1; transform: translateZ(0) scale(1); }
+  50% { opacity: 0.7; transform: translateZ(0) scale(1.02); }
+}
+
+@keyframes spin-gpu {
+  from { transform: translateZ(0) rotate(0deg); }
+  to { transform: translateZ(0) rotate(360deg); }
+}
+
+/* Apply GPU acceleration to common animated elements */
+.bar-animation,
+.sorting-bar,
+.live-visual-bar {
+  transform: translateZ(0);
+  will-change: transform, height, opacity;
+  backface-visibility: hidden;
+}
+
+/* Optimize Recharts SVG elements */
+.recharts-wrapper {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.recharts-surface {
+  transform: translateZ(0);
+}
+
+/* Keep tooltips in front of bars and chart lines */
+.recharts-tooltip-wrapper {
+  z-index: 1000;
+}
+
+/* Remove the browser focus outline (orange ring) when clicking on charts */
+/* Recharts SVGs have tabindex=0, so clicking anywhere in a chart focuses the SVG and draws an outline */
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus {
+  outline: none;
+}
+
+/* ==========================================================================
+   LIGHT NEUMORPHISM (SOFT UI) — Sorting AI Assistant
+   Soft raised / inset surfaces on a warm light base (#eef1f5)
+   ========================================================================== */
+
+/* Depth levels:
+   Level 1 — main panel        → large raised shadow
+   Level 2 — message bubbles   → medium raised shadow
+   Level 3 — buttons / chips   → small raised shadow
+   Level 4 — inputs            → inset shadow
+   Level 5 — active controls   → inset / pressed
+*/
+
+.neu-base {
+  background: #eef1f5;
+}
+
+/* Level 1 — main assistant panel (gently raised from the page) */
+.neu-panel {
+  background: #eef1f5;
+  border-radius: 28px;
+  box-shadow:
+    12px 12px 24px rgba(163, 177, 198, 0.5),
+    -12px -12px 24px rgba(255, 255, 255, 0.95);
+}
+
+/* Level 1b — inner surfaces flush with the panel (sidebar, header, footer) */
+.neu-surface {
+  background: #eef1f5;
+}
+
+/* Level 2 — raised message bubbles & content cards */
+.neu-bubble {
+  background: #eef1f5;
+  border-radius: 18px;
+  box-shadow:
+    4px 4px 8px rgba(163, 177, 198, 0.35),
+    -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+/* Level 2b — user message: soft indigo-tinted raised surface */
+.neu-bubble-user {
+  background: linear-gradient(135deg, #e4e9fb 0%, #edf0fa 100%);
+  border-radius: 18px;
+  box-shadow:
+    4px 4px 10px rgba(163, 177, 198, 0.4),
+    -4px -4px 8px rgba(255, 255, 255, 0.85);
+}
+
+/* Level 3 — small raised controls (buttons, chips, icon buttons) */
+.neu-control {
+  background: #eef1f5;
+  border-radius: 12px;
+  box-shadow:
+    4px 4px 8px rgba(163, 177, 198, 0.45),
+    -4px -4px 8px rgba(255, 255, 255, 0.9);
+  transition: box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
+}
+
+.neu-control:hover {
+  box-shadow:
+    6px 6px 12px rgba(163, 177, 198, 0.5),
+    -6px -6px 12px rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+.neu-control:active {
+  box-shadow:
+    inset 4px 4px 8px rgba(163, 177, 198, 0.45),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  transform: translateY(0);
+}
+
+/* Level 4 — inset inputs */
+.neu-input {
+  background: #eef1f5;
+  border: none;
+  border-radius: 18px;
+  box-shadow:
+    inset 5px 5px 10px rgba(163, 177, 198, 0.35),
+    inset -5px -5px 10px rgba(255, 255, 255, 0.9);
+  transition: box-shadow 180ms ease, background 180ms ease;
+}
+
+.neu-input:focus {
+  outline: none;
+  box-shadow:
+    inset 5px 5px 10px rgba(163, 177, 198, 0.35),
+    inset -5px -5px 10px rgba(255, 255, 255, 0.9),
+    0 0 0 2px rgba(90, 120, 220, 0.15);
+}
+
+/* Level 5 — pressed / inset state for active controls */
+.neu-inset {
+  background: #eef1f5;
+  border-radius: 12px;
+  box-shadow:
+    inset 4px 4px 8px rgba(163, 177, 198, 0.45),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+}
+
+/* Suggested prompt chips (raised, tactile) */
+.neu-chip {
+  background: #eef1f5;
+  border-radius: 14px;
+  border: none;
+  box-shadow:
+    5px 5px 10px rgba(163, 177, 198, 0.4),
+    -5px -5px 10px rgba(255, 255, 255, 0.85);
+  transition: box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
+}
+
+.neu-chip:hover {
+  box-shadow:
+    7px 7px 14px rgba(163, 177, 198, 0.48),
+    -7px -7px 14px rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+.neu-chip:active {
+  box-shadow:
+    inset 4px 4px 8px rgba(163, 177, 198, 0.45),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  transform: translateY(0);
+}
+
+/* Neumorphic circular avatar */
+.neu-avatar {
+  background: #eef1f5;
+  border-radius: 50%;
+  box-shadow:
+    6px 6px 12px rgba(163, 177, 198, 0.5),
+    -6px -6px 12px rgba(255, 255, 255, 0.95);
+}
+
+/* Small circular AI avatar in chat (gently raised) */
+.neu-avatar-sm {
+  background: #eef1f5;
+  border-radius: 50%;
+  box-shadow:
+    4px 4px 8px rgba(163, 177, 198, 0.45),
+    -4px -4px 8px rgba(255, 255, 255, 0.9);
+}
+
+/* Thinking indicator — small raised circular bubble */
+.neu-thinking {
+  background: #eef1f5;
+  border-radius: 16px;
+  box-shadow:
+    inset 3px 3px 6px rgba(163, 177, 198, 0.25),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+
+/* Code block container — light inset soft surface */
+.neu-code {
+  background: #e7ebf0;
+  border-radius: 16px;
+  box-shadow:
+    inset 4px 4px 8px rgba(163, 177, 198, 0.3),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+/* Table container — subtle raised surface */
+.neu-table {
+  background: #eef1f5;
+  border-radius: 16px;
+  box-shadow:
+    3px 3px 6px rgba(163, 177, 198, 0.3),
+    -3px -3px 6px rgba(255, 255, 255, 0.85);
+}
+
+/* Neumorphic text palette */
+.neu-text-primary { color: #202532; }
+.neu-text-secondary { color: #687080; }
+
+/* Soft fade/slide entrance for messages */
+@keyframes neu-message-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.neu-message-in {
+  animation: neu-message-in 220ms ease-out both;
+}
+
+/* Subtle AI avatar pulse while thinking */
+@keyframes neu-think-pulse {
+  0%, 100% { box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.45), -4px -4px 8px rgba(255, 255, 255, 0.9); }
+  50% { box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.4), inset -4px -4px 8px rgba(255, 255, 255, 0.9); }
+}
+
+.neu-thinking-avatar {
+  animation: neu-think-pulse 1.6s ease-in-out infinite;
+}
+
+/* Reduce neumorphic shadows on small screens to avoid visual clutter */
+@media (max-width: 640px) {
+  .neu-panel {
+    box-shadow:
+      8px 8px 16px rgba(163, 177, 198, 0.45),
+      -8px -8px 16px rgba(255, 255, 255, 0.9);
+    border-radius: 22px;
+  }
+  .neu-control,
+  .neu-chip {
+    box-shadow:
+      3px 3px 6px rgba(163, 177, 198, 0.4),
+      -3px -3px 6px rgba(255, 255, 255, 0.85);
+  }
+}
+
+/* Reduce motion for better performance */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce,
+  .animate-ping {
+    animation: none !important;
+  }
+}
