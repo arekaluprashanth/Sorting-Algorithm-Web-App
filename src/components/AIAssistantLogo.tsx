@@ -21,11 +21,11 @@ export const AIAssistantLogo: React.FC<AIAssistantLogoProps> = ({
     ? 'w-5 h-5' 
     : size === 'md' 
     ? 'w-4 h-4' 
-    : className;
+    : '';
 
   return (
     <BotMessageSquare 
-      className={`shrink-0 ${sizeClass}`} 
+      className={`shrink-0 ${sizeClass} ${className}`.trim()} 
       aria-hidden="true" 
     />
   );

@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Play, 
-  RotateCcw, 
-  Sliders, 
-  Layers, 
-  CheckSquare, 
-  Square as SquareIcon, 
   AlertTriangle,
   Info,
   ChevronDown,

@@ -5,17 +5,10 @@ import {
   SkipBack,
   SkipForward,
   RotateCcw,
-  Sparkles,
   ArrowRight,
   Shuffle,
-  CheckCircle2,
-  Sliders,
   Code,
-  Info,
-  HelpCircle,
-  Hash,
-  Activity,
-  Maximize2
+  Activity
 } from 'lucide-react';
 import { ALGORITHMS } from '../algorithms';
 import { SupportedAlgorithmId, SimulationStep } from '../types';

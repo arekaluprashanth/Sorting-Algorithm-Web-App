@@ -46,7 +46,7 @@ function AppContent() {
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap min-w-0">
                 <span className="font-bold text-sm sm:text-[15px] tracking-tight text-slate-900 truncate">
-                  Sorting Algoritm Web App
+                  Sorting Algorithm Web App
                 </span>
               </div>
             </div>
@@ -102,7 +102,7 @@ function AppContent() {
         <div className="mx-auto max-w-[1800px] w-full px-3 sm:px-4 lg:px-6 flex flex-col md:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-slate-600">
             <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block" />
-            <span className="font-semibold text-slate-800">Sorting Algoritm Web App</span>
+            <span className="font-semibold text-slate-800">Sorting Algorithm Web App</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2 text-slate-500">
             <span>Interactive visualizer</span>

@@ -1,6 +1,6 @@
 @echo off
 REM =====================================================
-REM SortBench Server Auto-Start Script
+REM Sorting Algorithm Web App Server Auto-Start Script
 REM =====================================================
 REM Instructions:
 REM 1. Copy this file to Windows Startup folder:
@@ -10,7 +10,7 @@ REM 3. To stop: Run "npx pm2 stop sorting-app-server" or "npx pm2 stop all"
 REM 4. To check status: Run "npx pm2 status"
 REM =====================================================
 
-cd /d "C:\Users\prash\Downloads\sorting algo web app"
+cd /d "%~dp0"
 
 REM Start PM2 and resurrect saved processes
 npx pm2 resurrect
@@ -18,7 +18,7 @@ npx pm2 resurrect
 REM Log startup
 echo. >> "%APPDATA%\.pm2\startup.log"
 echo ===================================== >> "%APPDATA%\.pm2\startup.log"
-echo SortBench Server Started at %date% %time% >> "%APPDATA%\.pm2\startup.log"
+echo Sorting Algorithm Web App Server Started at %date% %time% >> "%APPDATA%\.pm2\startup.log"
 echo ===================================== >> "%APPDATA%\.pm2\startup.log"
 
 exit

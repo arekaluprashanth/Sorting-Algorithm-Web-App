@@ -16,16 +16,7 @@ import {
   TrendingUp,
   BarChart3,
   LineChart as LineChartIcon,
-  Maximize2,
-  Minimize2,
-  Eye,
-  EyeOff,
-  Zap,
-  Clock,
   Sparkles,
-  Award,
-  Layers,
-  HelpCircle,
 } from 'lucide-react';
 import { ALGORITHMS } from '../algorithms';
 import {

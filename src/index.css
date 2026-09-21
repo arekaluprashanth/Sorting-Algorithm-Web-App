@@ -69,10 +69,16 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+    .animate-pulse,
+    .animate-spin,
+    .animate-bounce,
+    .animate-ping {
+      animation: none !important;
+    }
   }
 }
 
-/* Performance Optimizations for 165Hz Refresh Rate */
+/* Performance Optimizations */
 @layer utilities {
   /* GPU Acceleration Classes */
   .gpu-accelerated {
@@ -114,17 +120,6 @@
     scroll-behavior: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-  }
-
-  /* Hardware Accelerated Transforms */
-  .transform-gpu {
-    transform: translateZ(0);
-    will-change: transform;
-  }
-
-  .transform-gpu-3d {
-    transform: translate3d(0, 0, 0);
-    will-change: transform;
   }
 
   /* Optimized Opacity Animations */
@@ -177,11 +172,6 @@ main > div > section {
   background: rgba(100, 116, 139, 0.65);
 }
 
-.gpu-boost {
-  transform: translateZ(0);
-  will-change: transform, opacity;
-}
-
 .animated-logo-nodes {
   transform-origin: 32px 32px;
   animation: logo-orbit 2.4s linear infinite;
@@ -209,7 +199,7 @@ main > div > section {
   to { opacity: 1; transform: rotate(90deg) scale(1); }
 }
 
-/* High Performance Animation Keyframes - Optimized for 165Hz */
+/* High Performance Animation Keyframes */
 @keyframes fade-in-fast {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -472,12 +462,4 @@ main > div > section {
   }
 }
 
-/* Reduce motion for better performance */
-@media (prefers-reduced-motion: reduce) {
-  .animate-pulse,
-  .animate-spin,
-  .animate-bounce,
-  .animate-ping {
-    animation: none !important;
-  }
-}
+

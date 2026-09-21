@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Serve static files from dist folder
 app.use(express.static(path.join(__dirname, 'dist')));
@@ -35,7 +35,7 @@ app.listen(PORT, '0.0.0.0', () => {
   const networkIP = getNetworkIP();
   console.log(`
 ╔══════════════════════════════════════════════════════════╗
-║   SortBench Server Running 24/7                         ║
+║   Sorting Algorithm Web App Server Running 24/7         ║
 ║   Local:   http://localhost:${PORT}/                      ║
 ║   Network: http://${networkIP}:${PORT}/                     ║
 ║                                                          ║

@@ -4,8 +4,6 @@ import {
   Pause, 
   RotateCcw, 
   Sparkles, 
-  Gauge, 
-  Award, 
   CheckCircle2 
 } from 'lucide-react';
 import { ALGORITHMS } from '../algorithms';

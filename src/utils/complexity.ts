@@ -30,7 +30,7 @@ export function computeTheoreticalCurves(
 
   // Normalization constants
   const cLinear = refTime / refSize;
-  const cNLogN = refTime / (refSize * Math.log2(refSize || 2));
+  const cNLogN = refTime / (refSize * Math.max(1, Math.log2(refSize || 2)));
   const cN2 = refTime / (refSize * refSize);
   const cN1_5 = refTime / Math.pow(refSize, 1.5);
 

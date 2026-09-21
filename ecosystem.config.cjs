@@ -1,8 +1,8 @@
 module.exports = {
   apps: [
     {
-      name: 'sorting-app-server',
-      script: './server.mjs',
+      name: 'sorting-algorithm-web-app',
+      script: './dist/server.cjs',
       cwd: './',
       instances: 1,
       exec_mode: 'fork',

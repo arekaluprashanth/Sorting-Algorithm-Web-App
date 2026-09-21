@@ -2,7 +2,7 @@ import { DistributionType } from '../types';
 
 /**
  * Optimized array generation with reduced Math.random() calls
- * Uses typed arrays and batch generation for better performance with large N
+ * Uses pre-allocated arrays and batch generation for better performance
  */
 export function generateArray(size: number, distribution: DistributionType, maxVal?: number): number[] {
   const max = maxVal ?? size * 10;
@@ -11,9 +11,9 @@ export function generateArray(size: number, distribution: DistributionType, maxV
   // Batch random generation for better performance with large arrays
   const batchSize = Math.min(10000, size);
   const batches = Math.ceil(size / batchSize);
-  const remaining = size % batchSize || batchSize;
 
   switch (distribution) {
+    default:
     case 'random': {
       // Generate all random values in batches for better cache performance
       for (let b = 0; b < batches; b++) {
@@ -62,10 +62,8 @@ export function generateArray(size: number, distribution: DistributionType, maxV
       // Pre-compute unique values and reuse them
       const uniqueCount = Math.min(8, Math.max(3, Math.floor(Math.log2(size))));
       const uniqueValues = Array.from({ length: uniqueCount }, (_, idx) => (idx + 1) * 100);
-      // Create lookup table for faster random selection
-      const valueLookup = uniqueValues;
       for (let i = 0; i < size; i++) {
-        arr[i] = valueLookup[Math.floor(Math.random() * uniqueCount)];
+        arr[i] = uniqueValues[Math.floor(Math.random() * uniqueCount)];
       }
       return arr;
     }
@@ -77,12 +75,6 @@ export function generateArray(size: number, distribution: DistributionType, maxV
       }
       return arr;
     }
-
-    default:
-      for (let i = 0; i < size; i++) {
-        arr[i] = Math.floor(Math.random() * max);
-      }
-      return arr;
   }
 }
 

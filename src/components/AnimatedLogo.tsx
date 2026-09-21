@@ -9,7 +9,7 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({ className = '' }) =>
   <img
     src={logoUrl}
     className={`animated-logo gpu-accelerated ${className}`} 
-    alt="Sorting Algoritm Web App logo"
-    style={{ imageRendering: 'crisp-edges', backfaceVisibility: 'hidden' }}
+    alt="Sorting Algorithm Web App logo"
+    style={{ imageRendering: 'crisp-edges' }}
   />
 );

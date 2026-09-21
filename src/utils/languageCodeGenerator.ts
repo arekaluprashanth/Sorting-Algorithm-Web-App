@@ -83,7 +83,7 @@ int main() {
               {
                 stepNumber: 1,
                 heading: 'Pass Boundary Loop',
-                description: `Iterates outer index i from 0 up to ${n - 2}. In each pass, the next largest element floats to index ${n - 1 - 0}.`,
+                description: `Iterates outer index i from 0 up to ${n - 2}. In each pass, the next largest element floats to index ${n - 1}.`,
                 codeSnippet: 'for (int i = 0; i < n - 1; i++) {\n    bool swapped = false;',
               },
               {
