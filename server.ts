@@ -80,7 +80,7 @@ app.post('/api/ai/chat', async (req: Request, res: Response): Promise<void> => {
     });
 
     const primaryModel = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
-    const fallbackModel = 'gemini-3.8-flash';
+    const fallbackModel = 'gemini-3.6-flash';
 
     let streamResponse;
     try {
