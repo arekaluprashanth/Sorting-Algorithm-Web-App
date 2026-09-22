@@ -21,6 +21,15 @@ import {
   RotateCcw,
   Pencil,
   Mic,
+  GripHorizontal,
+  Move,
+  Eye,
+  Minus,
+  Scaling,
+  Columns,
+  Smartphone,
+  Monitor,
+  Maximize,
 } from 'lucide-react';
 import { useVisualizerContext } from '../context/VisualizerContext';
 import { streamAIChat, ChatHistoryItem } from '../services/aiService';
@@ -610,6 +619,38 @@ const MemoizedChatMessageItem = memo(
     prev.copied === next.copied
 );
 
+const getInitialBounds = () => {
+  if (typeof window === 'undefined') return { x: 40, y: 70, width: 560, height: 680 };
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (w < 640) {
+    return {
+      x: 10,
+      y: 60,
+      width: Math.max(300, w - 20),
+      height: Math.max(420, h - 80),
+    };
+  } else if (w < 1024) {
+    const width = Math.min(500, w - 30);
+    const height = Math.min(640, h - 90);
+    return {
+      x: Math.max(15, w - width - 15),
+      y: 70,
+      width,
+      height,
+    };
+  } else {
+    const width = 580;
+    const height = Math.min(720, h - 90);
+    return {
+      x: Math.max(20, w - width - 25),
+      y: 70,
+      width,
+      height,
+    };
+  }
+};
+
 export const SortingAIAssistant: React.FC = () => {
   const {
     visualizerContext,
@@ -630,6 +671,186 @@ export const SortingAIAssistant: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Floating Window Pos, Size, Crop Ratio, Minimization, & Glass Transparency
+  const [windowPos, setWindowPos] = useState<{ x: number; y: number }>(() => getInitialBounds());
+  const [windowSize, setWindowSize] = useState<{ width: number; height: number }>(() => ({
+    width: getInitialBounds().width,
+    height: getInitialBounds().height,
+  }));
+  const [isMinimized, setIsMinimized] = useState<boolean>(false);
+  const [transparencyMode, setTransparencyMode] = useState<'solid' | 'translucent' | 'glass'>('translucent');
+  const [showCropMenu, setShowCropMenu] = useState<boolean>(false);
+
+  // Keep window in bounds on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowPos((prev) => {
+        const currentW = isMinimized ? 220 : windowSize.width;
+        const currentH = isMinimized ? 48 : windowSize.height;
+        const maxX = Math.max(10, window.innerWidth - currentW - 10);
+        const maxY = Math.max(10, window.innerHeight - currentH - 10);
+        return {
+          x: Math.min(maxX, Math.max(10, prev.x)),
+          y: Math.min(maxY, Math.max(10, prev.y)),
+        };
+      });
+      setWindowSize((prev) => ({
+        width: Math.min(window.innerWidth - 20, Math.max(320, prev.width)),
+        height: Math.min(window.innerHeight - 20, Math.max(340, prev.height)),
+      }));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMinimized, windowSize]);
+
+  // Pointer-based Window Dragging
+  const handleDragStart = (e: React.PointerEvent) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('input') ||
+      target.closest('textarea') ||
+      target.closest('a') ||
+      target.closest('[data-no-drag="true"]')
+    ) {
+      return;
+    }
+
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const initialX = windowPos.x;
+    const initialY = windowPos.y;
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+
+      const currentW = isMinimized ? 220 : isExpanded ? window.innerWidth - 20 : windowSize.width;
+      const currentH = isMinimized ? 48 : isExpanded ? window.innerHeight - 20 : windowSize.height;
+
+      const maxX = Math.max(10, window.innerWidth - currentW - 10);
+      const maxY = Math.max(10, window.innerHeight - currentH - 10);
+
+      const newX = Math.min(maxX, Math.max(10, initialX + deltaX));
+      const newY = Math.min(maxY, Math.max(10, initialY + deltaY));
+
+      setWindowPos({ x: newX, y: newY });
+    };
+
+    const onPointerUp = () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+  };
+
+  // Pointer-based Window Resizing (Crop ratio / custom dimensions)
+  const handleResizeStart = (direction: string, e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const initialPos = { ...windowPos };
+    const initialSize = { ...windowSize };
+
+    const minW = Math.min(320, window.innerWidth - 20);
+    const minH = 340;
+    const maxW = window.innerWidth - 20;
+    const maxH = window.innerHeight - 20;
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+
+      let newW = initialSize.width;
+      let newH = initialSize.height;
+      let newX = initialPos.x;
+      let newY = initialPos.y;
+
+      if (direction.includes('e')) {
+        newW = Math.min(maxW, Math.max(minW, initialSize.width + deltaX));
+      }
+      if (direction.includes('s')) {
+        newH = Math.min(maxH, Math.max(minH, initialSize.height + deltaY));
+      }
+      if (direction.includes('w')) {
+        const candidateW = initialSize.width - deltaX;
+        if (candidateW >= minW && candidateW <= maxW) {
+          newW = candidateW;
+          newX = initialPos.x + deltaX;
+        }
+      }
+      if (direction.includes('n')) {
+        const candidateH = initialSize.height - deltaY;
+        if (candidateH >= minH && candidateH <= maxH) {
+          newH = candidateH;
+          newY = initialPos.y + deltaY;
+        }
+      }
+
+      setWindowSize({ width: newW, height: newH });
+      setWindowPos({ x: newX, y: newY });
+    };
+
+    const onPointerUp = () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+  };
+
+  // Crop Ratio / Aspect Ratio presets
+  const applyCropPreset = (preset: 'compact' | 'standard' | 'wide' | 'tall' | 'reset') => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    let targetW = 560;
+    let targetH = 680;
+
+    if (preset === 'compact') {
+      targetW = Math.min(380, w - 20);
+      targetH = Math.min(520, h - 80);
+    } else if (preset === 'standard') {
+      targetW = Math.min(560, w - 20);
+      targetH = Math.min(700, h - 80);
+    } else if (preset === 'wide') {
+      targetW = Math.min(840, w - 20);
+      targetH = Math.min(700, h - 80);
+    } else if (preset === 'tall') {
+      targetW = Math.min(460, w - 20);
+      targetH = Math.max(380, h - 90);
+    } else if (preset === 'reset') {
+      const defaults = getInitialBounds();
+      targetW = defaults.width;
+      targetH = defaults.height;
+      setWindowPos({ x: defaults.x, y: defaults.y });
+    }
+
+    setWindowSize({ width: targetW, height: targetH });
+    setIsExpanded(false);
+    setIsMinimized(false);
+    setShowCropMenu(false);
+
+    setWindowPos((prev) => ({
+      x: Math.min(Math.max(10, prev.x), Math.max(10, w - targetW - 10)),
+      y: Math.min(Math.max(10, prev.y), Math.max(10, h - targetH - 10)),
+    }));
+  };
+
+  const cycleTransparency = () => {
+    setTransparencyMode((curr) => {
+      if (curr === 'solid') return 'translucent';
+      if (curr === 'translucent') return 'glass';
+      return 'solid';
+    });
+  };
 
   // Mark this user as visited so old chats are only cleared on their first ever open
   useEffect(() => {
@@ -1183,56 +1404,86 @@ export const SortingAIAssistant: React.FC = () => {
 
   return (
     <>
-      {/* Backdrop overlay — blurs the interface behind the assistant */}
-      <AnimatePresence>
-        {isAssistantOpen && (
-          <motion.div
-            key="assistant-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setIsAssistantOpen(false)}
-            className="fixed inset-0 z-50 bg-[#dfe4ec]/60 backdrop-blur-md overscroll-contain"
-            aria-hidden="true"
-          />
-        )}
-      </AnimatePresence>
-
-      {/* AI Assistant Workspace Centered on the Screen */}
+      {/* Floating, Movable, Resizable AI Assistant Window without blocking backdrop */}
       <AnimatePresence>
         {isAssistantOpen && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-5 pointer-events-none overscroll-contain"
-            aria-modal="true"
-            role="dialog"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setIsAssistantOpen(false);
-              }
-            }}
+            className="fixed inset-0 pointer-events-none z-50 overflow-hidden"
+            aria-modal="false"
           >
-            {/* Soft ambient light behind the soft panel */}
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-200/25 rounded-full blur-[110px] pointer-events-none -z-10" />
-            <div className="absolute bottom-1/4 right-1/4 w-[420px] h-[420px] bg-violet-200/20 rounded-full blur-[110px] pointer-events-none -z-10" />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              onWheel={(e) => {
-                if (isExpanded) e.stopPropagation();
-              }}
-              onTouchMove={(e) => {
-                if (isExpanded) e.stopPropagation();
-              }}
-              className={`pointer-events-auto neu-panel flex flex-row overflow-hidden overscroll-contain transition-all duration-200 ${
-                isExpanded
-                  ? 'w-[98vw] h-[96vh] max-w-none max-h-none'
-                  : 'w-[95vw] max-w-[1060px] h-[85vh] max-h-[820px]'
-              }`}
-            >
+            {isMinimized ? (
+              /* Minimized Floating Pill Widget */
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                style={{
+                  left: `${windowPos.x}px`,
+                  top: `${windowPos.y}px`,
+                }}
+                onPointerDown={handleDragStart}
+                className="pointer-events-auto absolute p-2 px-3.5 rounded-2xl bg-indigo-600/95 text-white font-bold text-xs shadow-2xl border border-indigo-400/50 flex items-center gap-2.5 cursor-grab active:cursor-grabbing backdrop-blur-md ring-2 ring-indigo-300/50 hover:bg-indigo-700 transition-colors"
+                title="Click & Drag to reposition / Click to expand Sorting AI"
+              >
+                <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                  <AIAssistantLogo className="w-3.5 h-3.5 text-white" />
+                </div>
+                <div
+                  onClick={() => setIsMinimized(false)}
+                  className="flex items-center gap-1.5 cursor-pointer select-none"
+                >
+                  <span>Sorting AI</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                </div>
+                <div className="flex items-center gap-1 border-l border-white/25 pl-1.5 ml-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsMinimized(false)}
+                    title="Expand Sorting AI window"
+                    className="p-1 rounded-lg hover:bg-white/20 text-white cursor-pointer transition-colors"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsAssistantOpen(false)}
+                    title="Close Assistant"
+                    className="p-1 rounded-lg hover:bg-rose-500/80 text-white cursor-pointer transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              /* Full Floating, Movable, Resizable Window */
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                style={
+                  isExpanded
+                    ? {
+                        left: '10px',
+                        top: '10px',
+                        width: 'calc(100vw - 20px)',
+                        height: 'calc(100vh - 20px)',
+                      }
+                    : {
+                        left: `${windowPos.x}px`,
+                        top: `${windowPos.y}px`,
+                        width: `${windowSize.width}px`,
+                        height: `${windowSize.height}px`,
+                      }
+                }
+                className={`pointer-events-auto absolute flex flex-row overflow-hidden select-text ${
+                  transparencyMode === 'glass'
+                    ? 'neu-panel-glass'
+                    : transparencyMode === 'translucent'
+                    ? 'neu-panel-translucent'
+                    : 'neu-panel'
+                }`}
+              >
             {/* 1. LEFT VERTICAL SIDEBAR */}
             <div
               className={`${
@@ -1365,9 +1616,13 @@ export const SortingAIAssistant: React.FC = () => {
 
             {/* 2. RIGHT CHAT WORKSPACE */}
             <div className="flex-1 flex flex-col min-w-0 neu-surface h-full relative">
-              {/* Chat Top Header */}
-              <div className="px-4 py-3 neu-surface flex items-center justify-between gap-3 shrink-0">
-                <div className="flex items-center gap-3 min-w-0">
+              {/* Chat Top Header - Movable by drag */}
+              <div
+                onPointerDown={handleDragStart}
+                className="px-4 py-3 neu-surface flex items-center justify-between gap-3 shrink-0 cursor-grab active:cursor-grabbing border-b border-slate-200/40 select-none"
+                title="Drag header to move Sorting AI anywhere"
+              >
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   {!isSidebarOpen && (
                     <button
                       type="button"
@@ -1379,25 +1634,135 @@ export const SortingAIAssistant: React.FC = () => {
                     </button>
                   )}
 
-                  {/* AI Assistant Avatar — soft round raised element */}
-                  <div className="neu-avatar-sm w-9 h-9 flex items-center justify-center text-indigo-600 shrink-0">
-                    <AIAssistantLogo className="w-4.5 h-4.5 text-indigo-600" />
+                  {/* Move Grip Handle Indicator */}
+                  <div
+                    onPointerDown={handleDragStart}
+                    className="p-1 px-1.5 rounded-lg bg-slate-200/60 hover:bg-slate-300/80 text-slate-600 text-[10px] font-bold flex items-center gap-1 cursor-grab active:cursor-grabbing border border-slate-300/50 shadow-2xs"
+                    title="Click & Drag to move window"
+                  >
+                    <GripHorizontal className="w-3.5 h-3.5 text-slate-600" />
+                    <span className="hidden md:inline">Move</span>
+                  </div>
+
+                  {/* AI Assistant Avatar */}
+                  <div className="neu-avatar-sm w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-indigo-600 shrink-0">
+                    <AIAssistantLogo className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-indigo-600" />
                   </div>
 
                   <div className="min-w-0 flex flex-col">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-sm text-[#202532] tracking-tight truncate">
-                        Sorting AI Assistant
+                      <h3 className="font-bold text-xs sm:text-sm text-[#202532] tracking-tight truncate">
+                        Sorting AI
                       </h3>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline-block" />
                     </div>
-                    <p className="text-[11px] text-[#687080] truncate">
-                      {activeSession.title !== 'New Conversation' ? activeSession.title : 'AI-powered sorting assistant'}
+                    <p className="text-[10px] sm:text-[11px] text-[#687080] truncate max-w-[140px] sm:max-w-[200px]">
+                      {activeSession.title !== 'New Conversation' ? activeSession.title : 'AI sorting assistant'}
                     </p>
                   </div>
                 </div>
 
-                {/* Header Window Actions */}
-                <div className="flex items-center gap-1.5 text-slate-500">
+                {/* Header Window Actions (Crop Ratio, Glass Opacity, Minimize, Maximize, Close) */}
+                <div className="flex items-center gap-1 sm:gap-1.5 text-slate-500 relative">
+                  {/* Crop / Aspect Ratio Preset Menu */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowCropMenu((p) => !p)}
+                      title="Adjust window crop ratio / layout presets"
+                      aria-label="Adjust window crop ratio"
+                      className={`neu-control p-1.5 transition-colors cursor-pointer ${
+                        showCropMenu ? 'text-indigo-600 ring-1 ring-indigo-400' : 'text-[#687080] hover:text-slate-800'
+                      }`}
+                    >
+                      <Scaling className="w-3.5 h-3.5" />
+                    </button>
+
+                    {showCropMenu && (
+                      <div
+                        data-no-drag="true"
+                        className="absolute right-0 top-full mt-2 w-48 rounded-2xl bg-white/95 border border-slate-200 shadow-2xl p-1.5 z-50 space-y-1 text-slate-700 backdrop-blur-md"
+                      >
+                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 flex items-center justify-between">
+                          <span>Crop Ratio Presets</span>
+                          <Scaling className="w-3 h-3 text-slate-400" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => applyCropPreset('compact')}
+                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-indigo-50 hover:text-indigo-900 flex items-center gap-2 cursor-pointer transition-colors"
+                        >
+                          <Smartphone className="w-3.5 h-3.5 text-indigo-600" />
+                          <div>
+                            <div className="font-semibold">Compact (Mobile)</div>
+                            <div className="text-[10px] text-slate-400">380 × 520 px</div>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyCropPreset('standard')}
+                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-indigo-50 hover:text-indigo-900 flex items-center gap-2 cursor-pointer transition-colors"
+                        >
+                          <Columns className="w-3.5 h-3.5 text-emerald-600" />
+                          <div>
+                            <div className="font-semibold">Split View</div>
+                            <div className="text-[10px] text-slate-400">560 × 700 px</div>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyCropPreset('wide')}
+                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-indigo-50 hover:text-indigo-900 flex items-center gap-2 cursor-pointer transition-colors"
+                        >
+                          <Monitor className="w-3.5 h-3.5 text-amber-600" />
+                          <div>
+                            <div className="font-semibold">Wide Studio</div>
+                            <div className="text-[10px] text-slate-400">840 × 700 px</div>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyCropPreset('tall')}
+                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-indigo-50 hover:text-indigo-900 flex items-center gap-2 cursor-pointer transition-colors"
+                        >
+                          <PanelLeft className="w-3.5 h-3.5 text-purple-600" />
+                          <div>
+                            <div className="font-semibold">Tall Sidebar</div>
+                            <div className="text-[10px] text-slate-400">460 × Full Height</div>
+                          </div>
+                        </button>
+                        <div className="border-t border-slate-100 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => applyCropPreset('reset')}
+                            className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-slate-100 flex items-center gap-2 text-slate-600 cursor-pointer transition-colors"
+                          >
+                            <RotateCcw className="w-3 h-3 text-slate-500" />
+                            <span>Reset to Default</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Glass Transparency Toggle (Solid -> Translucent -> Glass) */}
+                  <button
+                    type="button"
+                    onClick={cycleTransparency}
+                    title={`Transparency mode: ${transparencyMode} (Click to change: Solid / Translucent / Glass)`}
+                    aria-label="Toggle Glass Transparency"
+                    className={`neu-control p-1.5 transition-colors cursor-pointer ${
+                      transparencyMode === 'glass'
+                        ? 'text-indigo-600 ring-1 ring-indigo-400'
+                        : transparencyMode === 'translucent'
+                        ? 'text-emerald-600'
+                        : 'text-[#687080] hover:text-slate-800'
+                    }`}
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Clear conversation */}
                   <button
                     type="button"
                     onClick={handleClearCurrentChat}
@@ -1405,25 +1770,40 @@ export const SortingAIAssistant: React.FC = () => {
                     aria-label="Clear current conversation"
                     className="neu-control p-1.5 text-[#687080] hover:text-slate-800 cursor-pointer"
                   >
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className="w-3.5 h-3.5" />
                   </button>
+
+                  {/* Minimize to Floating Dock Pill */}
+                  <button
+                    type="button"
+                    onClick={() => setIsMinimized(true)}
+                    title="Minimize to floating widget"
+                    aria-label="Minimize"
+                    className="neu-control p-1.5 text-[#687080] hover:text-slate-800 cursor-pointer"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Maximize / Restore */}
                   <button
                     type="button"
                     onClick={() => setIsExpanded((prev) => !prev)}
-                    title={isExpanded ? 'Restore size' : 'Maximize panel'}
+                    title={isExpanded ? 'Restore window size' : 'Maximize panel'}
                     aria-label={isExpanded ? 'Restore size' : 'Maximize panel'}
                     className="neu-control p-1.5 text-[#687080] hover:text-slate-800 hidden sm:inline-flex cursor-pointer"
                   >
-                    {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                    {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
                   </button>
+
+                  {/* Close button */}
                   <button
                     type="button"
                     onClick={() => setIsAssistantOpen(false)}
                     title="Close Assistant"
                     aria-label="Close Assistant"
-                    className="neu-control p-1.5 text-[#687080] hover:text-slate-800 cursor-pointer"
+                    className="neu-control p-1.5 text-[#687080] hover:text-rose-600 cursor-pointer"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -1440,63 +1820,90 @@ export const SortingAIAssistant: React.FC = () => {
                   />
                 ))}
 
+                {/* Quick Interactive Prompt Suggestions */}
+                {messages.length <= 1 && (
+                  <div className="pt-2 space-y-2">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#687080]">
+                      Suggested questions for {algoName}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {[
+                        `How does ${algoName} work step-by-step?`,
+                        `Why is ${algoName} best/worst case different?`,
+                        `Explain the time & space complexity of ${algoName}`,
+                        `When should I use ${algoName} in production?`,
+                      ].map((prompt, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSendMessage(prompt)}
+                          className="neu-chip p-2.5 text-left text-xs text-[#202532] hover:text-indigo-900 transition-colors flex items-center justify-between gap-2 cursor-pointer group"
+                        >
+                          <span className="line-clamp-2">{prompt}</span>
+                          <span className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                            →
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Error Notification Banner if any */}
+              {/* Error Banner */}
               {errorMessage && (
-                <div className="mx-4 mb-1 px-4 py-2.5 neu-inset text-amber-800 text-xs flex items-center justify-between gap-2 shrink-0 rounded-2xl">
-                  <div className="flex items-center gap-2 truncate">
-                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span className="truncate">{errorMessage}</span>
+                <div className="px-4 py-2 bg-rose-50 border-t border-rose-200 text-rose-800 text-xs flex items-center justify-between gap-2 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    <span>{errorMessage}</span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleSendMessage(messages[messages.length - 2]?.content)}
-                    className="font-semibold text-amber-800 hover:underline shrink-0 text-[11px] cursor-pointer"
+                    onClick={() => setErrorMessage(null)}
+                    className="text-rose-600 hover:text-rose-900 text-xs font-bold cursor-pointer"
                   >
-                    Retry
+                    Dismiss
                   </button>
                 </div>
               )}
 
-              {/* Input Form Bar */}
-              <div className="p-3 sm:p-4 neu-surface shrink-0">
+              {/* Input Area */}
+              <div className="p-3 sm:p-4 neu-surface border-t border-slate-200/40 shrink-0">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleSendMessage();
                   }}
-                  className="max-w-3xl mx-auto flex items-end gap-2.5"
+                  className="flex items-end gap-2"
                 >
-                  <div className="neu-input relative flex-1 rounded-2xl">
+                  <div className="relative flex-1">
                     <textarea
                       ref={textareaRef}
-                      rows={1}
                       value={inputPrompt}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
-                      placeholder="Ask Anything..."
-                      className="w-full resize-none rounded-2xl border-0 bg-transparent px-4 py-3 text-xs sm:text-sm text-[#202532] placeholder:text-[#aab1c0] focus:outline-none focus:ring-0 leading-normal"
+                      placeholder={`Ask anything about ${algoName}... (Shift+Enter for new line)`}
+                      rows={1}
+                      className="neu-input w-full resize-none rounded-2xl px-4 py-3 pr-10 text-xs sm:text-sm text-[#202532] placeholder:text-[#aab1c0] focus:outline-none max-h-32 leading-relaxed"
                     />
-                  </div>
 
-                  {/* Voice input toggle (ChatGPT-style) */}
-                  {voiceSupported && (
-                    <button
-                      type="button"
-                      onClick={toggleVoiceInput}
-                      title={isListening ? 'Stop voice input' : 'Voice input'}
-                      aria-label={isListening ? 'Stop voice input' : 'Voice input'}
-                      className={`neu-control inline-flex h-11 w-11 items-center justify-center rounded-2xl shrink-0 cursor-pointer transition-all ${
-                        isListening
-                          ? 'text-rose-600 shadow-[inset_4px_4px_8px_rgba(163,177,198,0.45),inset_-4px_-4px_8px_rgba(255,255,255,0.9)] animate-pulse'
-                          : 'text-[#687080] hover:text-indigo-700'
-                      }`}
-                    >
-                      <Mic className="w-4 h-4" />
-                    </button>
-                  )}
+                    {voiceSupported && (
+                      <button
+                        type="button"
+                        onClick={toggleVoiceInput}
+                        title={isListening ? 'Stop recording voice' : 'Dictate with voice'}
+                        className={`absolute right-2.5 bottom-2.5 p-1 rounded-xl transition-colors cursor-pointer ${
+                          isListening
+                            ? 'bg-rose-500 text-white animate-pulse shadow-xs'
+                            : 'text-[#687080] hover:text-indigo-600'
+                        }`}
+                      >
+                        <Mic className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
 
                   {isGenerating ? (
                     <button
@@ -1521,7 +1928,46 @@ export const SortingAIAssistant: React.FC = () => {
                 </form>
               </div>
             </div>
+
+            {/* Corner & Edge Resize Handles for Manual Crop / Ratio Adjustment */}
+            {!isExpanded && (
+              <>
+                {/* Bottom-Right Corner Resize Grip Handle */}
+                <div
+                  onPointerDown={(e) => handleResizeStart('se', e)}
+                  title="Drag to resize / adjust crop ratio"
+                  className="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize flex items-end justify-end p-1 z-40 group"
+                >
+                  <div className="w-2.5 h-2.5 border-r-2 border-b-2 border-slate-400 group-hover:border-indigo-600 transition-colors" />
+                </div>
+
+                {/* Bottom Edge Resize Handle */}
+                <div
+                  onPointerDown={(e) => handleResizeStart('s', e)}
+                  className="absolute bottom-0 left-4 right-4 h-1.5 cursor-s-resize z-40 hover:bg-indigo-400/20 transition-colors"
+                />
+
+                {/* Right Edge Resize Handle */}
+                <div
+                  onPointerDown={(e) => handleResizeStart('e', e)}
+                  className="absolute top-4 bottom-4 right-0 w-1.5 cursor-e-resize z-40 hover:bg-indigo-400/20 transition-colors"
+                />
+
+                {/* Left Edge Resize Handle */}
+                <div
+                  onPointerDown={(e) => handleResizeStart('w', e)}
+                  className="absolute top-4 bottom-4 left-0 w-1.5 cursor-w-resize z-40 hover:bg-indigo-400/20 transition-colors"
+                />
+
+                {/* Bottom-Left Corner Resize Handle */}
+                <div
+                  onPointerDown={(e) => handleResizeStart('sw', e)}
+                  className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize z-40"
+                />
+              </>
+            )}
           </motion.div>
+          )}
         </div>
       )}
     </AnimatePresence>

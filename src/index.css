@@ -273,13 +273,39 @@ main > div > section {
   background: #eef1f5;
   border-radius: 28px;
   box-shadow:
+    0 20px 50px -12px rgba(15, 23, 42, 0.28),
     12px 12px 24px rgba(163, 177, 198, 0.5),
     -12px -12px 24px rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.neu-panel-translucent {
+  background: rgba(238, 241, 245, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 28px;
+  box-shadow:
+    0 24px 60px -15px rgba(15, 23, 42, 0.32),
+    12px 12px 24px rgba(163, 177, 198, 0.4),
+    -12px -12px 24px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+.neu-panel-glass {
+  background: rgba(238, 241, 245, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 28px;
+  box-shadow:
+    0 24px 60px -15px rgba(15, 23, 42, 0.35),
+    12px 12px 24px rgba(163, 177, 198, 0.3),
+    -12px -12px 24px rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.85);
 }
 
 /* Level 1b — inner surfaces flush with the panel (sidebar, header, footer) */
 .neu-surface {
-  background: #eef1f5;
+  background: transparent;
 }
 
 /* Level 2 — raised message bubbles & content cards */
