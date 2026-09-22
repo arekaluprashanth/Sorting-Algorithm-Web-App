@@ -612,31 +612,33 @@ const MemoizedChatMessageItem = memo(
 );
 
 const getInitialBounds = () => {
-  if (typeof window === 'undefined') return { x: 40, y: 70, width: 560, height: 680 };
+  if (typeof window === 'undefined') return { x: 50, y: 70, width: 620, height: 700 };
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (w < 640) {
+    const width = Math.max(300, w - 20);
+    const height = Math.max(420, h - 80);
     return {
-      x: 10,
-      y: 60,
-      width: Math.max(300, w - 20),
-      height: Math.max(420, h - 80),
+      x: Math.max(10, Math.round((w - width) / 2)),
+      y: Math.max(50, Math.round((h - height) / 2)),
+      width,
+      height,
     };
   } else if (w < 1024) {
-    const width = Math.min(500, w - 30);
-    const height = Math.min(640, h - 90);
+    const width = Math.min(580, w - 30);
+    const height = Math.min(680, h - 80);
     return {
-      x: Math.max(15, w - width - 15),
-      y: 70,
+      x: Math.max(15, Math.round((w - width) / 2)),
+      y: Math.max(60, Math.round((h - height) / 2)),
       width,
       height,
     };
   } else {
-    const width = 580;
+    const width = 640;
     const height = Math.min(720, h - 90);
     return {
-      x: Math.max(20, w - width - 25),
-      y: 70,
+      x: Math.max(20, Math.round((w - width) / 2)),
+      y: Math.max(60, Math.round((h - height) / 2)),
       width,
       height,
     };
@@ -664,13 +666,26 @@ export const SortingAIAssistant: React.FC = () => {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Floating Window Pos, Size & Minimization
+  // Floating Window Pos, Size & Minimization (Centered on Open)
   const [windowPos, setWindowPos] = useState<{ x: number; y: number }>(() => getInitialBounds());
   const [windowSize, setWindowSize] = useState<{ width: number; height: number }>(() => ({
     width: getInitialBounds().width,
     height: getInitialBounds().height,
   }));
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
+
+  // When assistant opens, always position it in the center first
+  const prevIsOpenRef = useRef(isAssistantOpen);
+  useEffect(() => {
+    if (!prevIsOpenRef.current && isAssistantOpen) {
+      const bounds = getInitialBounds();
+      setWindowPos({ x: bounds.x, y: bounds.y });
+      setWindowSize({ width: bounds.width, height: bounds.height });
+      setIsMinimized(false);
+      setIsExpanded(false);
+    }
+    prevIsOpenRef.current = isAssistantOpen;
+  }, [isAssistantOpen]);
 
   // Keep window in bounds on window resize
   useEffect(() => {
