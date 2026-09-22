@@ -622,7 +622,7 @@ export const SortingAIAssistant: React.FC = () => {
 
   const [sessions, setSessions] = useState<ChatSession[]>(loadInitialSessions);
   const [activeSessionId, setActiveSessionId] = useState<string>(() => loadInitialActiveId(sessions));
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [inputPrompt, setInputPrompt] = useState<string>('');
@@ -833,6 +833,9 @@ export const SortingAIAssistant: React.FC = () => {
     setSessions((prev) => [newSession, ...prev]);
     setActiveSessionId(newSessionId);
     setErrorMessage(null);
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      setIsSidebarOpen(false);
+    }
     setTimeout(() => textareaRef.current?.focus(), 80);
   };
 
@@ -841,6 +844,9 @@ export const SortingAIAssistant: React.FC = () => {
     if (isGenerating) handleStopGeneration();
     setActiveSessionId(sessionId);
     setErrorMessage(null);
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      setIsSidebarOpen(false);
+    }
     setTimeout(() => {
       scrollToBottom(false);
       textareaRef.current?.focus();
@@ -1231,7 +1237,7 @@ export const SortingAIAssistant: React.FC = () => {
             <div
               className={`${
                 isSidebarOpen ? 'flex' : 'hidden'
-              } w-64 sm:w-72 shrink-0 neu-surface flex-col h-full z-20`}
+              } w-full sm:w-72 absolute inset-0 z-30 sm:relative sm:inset-auto shrink-0 neu-surface flex-col h-full`}
             >
               {/* Sidebar Header */}
               <div className="p-3 neu-surface flex items-center justify-between gap-2">

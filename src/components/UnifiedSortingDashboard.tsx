@@ -917,7 +917,7 @@ export const UnifiedSortingDashboard: React.FC = () => {
           </div>
 
           {/* Quick Category Filter */}
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl text-xs font-semibold self-start lg:self-center">
+          <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-2xl text-xs font-semibold self-start lg:self-center max-w-full">
             <button
               onClick={() => setCategoryFilter('all')}
               className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
@@ -1157,7 +1157,7 @@ export const UnifiedSortingDashboard: React.FC = () => {
               </div>
 
               {/* Order pattern toggles */}
-              <div className="flex items-center gap-1 text-[11px]">
+              <div className="flex flex-wrap items-center gap-1 text-[11px]">
                 <span className="text-slate-400 font-medium mr-1">Pattern:</span>
                 <button
                   onClick={() => generateArrayByType(selectedType, 'shuffle')}
@@ -1310,15 +1310,16 @@ export const UnifiedSortingDashboard: React.FC = () => {
       </section>
 
       {/* 2. STEP-BY-STEP SIMULATION & ANIMATION EXECUTION TRACE VIEWPORT */}
-      <section id="simulation-section" className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-6">
-        {/* Download Feedback Toast */}
-        {downloadToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="p-3.5 rounded-2xl bg-emerald-600 text-white font-medium text-xs flex items-center justify-between gap-3 shadow-md border border-emerald-500"
-          >
+      {categoryFilter !== 'compare' && (
+        <section id="simulation-section" className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-6">
+          {/* Download Feedback Toast */}
+          {downloadToast && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="p-3.5 rounded-2xl bg-emerald-600 text-white font-medium text-xs flex items-center justify-between gap-3 shadow-md border border-emerald-500"
+            >
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
               <span>{downloadToast}</span>
@@ -1801,7 +1802,7 @@ export const UnifiedSortingDashboard: React.FC = () => {
 
           {/* Mode 1: Small Array (N <= 35) - Full Dynamic Motion Bars */}
           {currentStep.array.length <= 35 && (
-            <div className="flex items-end justify-center gap-2 sm:gap-3.5 w-full h-[150px] px-2 pt-6">
+            <div className="flex items-end justify-center gap-1.5 sm:gap-2.5 md:gap-3.5 w-full h-[150px] sm:h-[170px] px-1 sm:px-2 pt-6 overflow-x-auto min-w-0">
               {currentStep.array.map((val, idx) => {
                 const isComparing =
                   currentStep.comparing &&
@@ -1839,7 +1840,7 @@ export const UnifiedSortingDashboard: React.FC = () => {
                 return (
                   <div
                     key={idx}
-                    className="flex-1 flex flex-col items-center max-w-[64px]"
+                    className="flex-1 flex flex-col items-center min-w-[20px] max-w-[64px]"
                   >
                     <span className={`text-[10px] font-bold uppercase tracking-wider mb-1.5 h-4 text-center truncate ${statusBadgeBg || 'text-transparent'}`}>
                       {statusLabel || '•'}
@@ -2220,14 +2221,15 @@ export const UnifiedSortingDashboard: React.FC = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* 3. ALGORITHM COMPARISON & ASYMPTOTIC GRAPHS SECTION */}
       <section id="graphs-section" className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-8">
         <div className={`flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100 ${
-          categoryFilter === 'compare' ? 'lg:justify-center' : ''
+          categoryFilter === 'compare' ? 'items-center text-center justify-center' : ''
         }`}>
-          <div className={`flex items-center gap-3 ${categoryFilter === 'compare' ? 'lg:mx-auto text-center' : ''}`}>
-            <div className="p-2.5 rounded-2xl bg-indigo-600 text-white shadow-xs">
+          <div className={`flex items-center gap-3 ${categoryFilter === 'compare' ? 'mx-auto text-center flex-col sm:flex-row justify-center' : ''}`}>
+            <div className="p-2.5 rounded-2xl bg-indigo-600 text-white shadow-xs shrink-0">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div className={categoryFilter === 'compare' ? 'text-center' : ''}>
@@ -2245,48 +2247,52 @@ export const UnifiedSortingDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Metric switcher - hidden in Compare mode */}
-          {categoryFilter !== 'compare' && (
-            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold self-start lg:self-auto">
-              <button
-                onClick={() => setGraphMetric('totalOps')}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  graphMetric === 'totalOps' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Total Operations
-              </button>
-              <button
-                onClick={() => setGraphMetric('comparisons')}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  graphMetric === 'comparisons' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Comparisons
-              </button>
-              <button
-                onClick={() => setGraphMetric('swaps')}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  graphMetric === 'swaps' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Swaps / Writes
-              </button>
-            </div>
-          )}
+          {/* Metric switcher */}
+          <div className={`flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold ${
+            categoryFilter === 'compare' ? 'mx-auto' : 'self-start lg:self-auto'
+          }`}>
+            <button
+              onClick={() => setGraphMetric('totalOps')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                graphMetric === 'totalOps' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Total Operations
+            </button>
+            <button
+              onClick={() => setGraphMetric('comparisons')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                graphMetric === 'comparisons' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Comparisons
+            </button>
+            <button
+              onClick={() => setGraphMetric('swaps')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                graphMetric === 'swaps' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Swaps / Writes
+            </button>
+          </div>
         </div>
 
-        {/* Dual Chart Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Dual Chart Grid / Single Centered Chart in Compare mode */}
+        <div className={categoryFilter === 'compare' ? 'w-full max-w-5xl mx-auto flex flex-col items-center' : 'grid grid-cols-1 lg:grid-cols-2 gap-6'}>
           {/* Graph 1: Empirical Operations on Active Array */}
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-3">
+          <div className={`p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow space-y-4 w-full ${
+            categoryFilter === 'compare' ? 'text-center' : ''
+          }`}>
+            <div className={`flex flex-wrap items-center gap-3 pb-3 border-b border-slate-100 ${
+              categoryFilter === 'compare' ? 'justify-center text-center' : 'justify-between'
+            }`}>
+              <div className={`flex items-center gap-3 ${categoryFilter === 'compare' ? 'flex-col sm:flex-row justify-center text-center mx-auto' : ''}`}>
                 <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 shadow-xs">
                   <BarChart3 className="w-4.5 h-4.5" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
+                <div className={categoryFilter === 'compare' ? 'text-center' : ''}>
+                  <div className={`flex items-center gap-2 ${categoryFilter === 'compare' ? 'justify-center' : ''}`}>
                     <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                       {categoryFilter === 'compare' ? 'Selected Algorithm Performance' : 'Live Operations on Your Array'}
                     </h3>
@@ -2304,7 +2310,9 @@ export const UnifiedSortingDashboard: React.FC = () => {
             </div>
 
             {categoryFilter === 'compare' && comparisonRanking.length > 0 && (
-              <div className={`grid grid-cols-1 ${comparisonRanking.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} gap-3`}>
+              <div className={`grid grid-cols-1 ${
+                comparisonRanking.length === 2 ? 'sm:grid-cols-2' : comparisonRanking.length === 1 ? 'max-w-xs mx-auto' : 'sm:grid-cols-3'
+              } gap-3 ${categoryFilter === 'compare' ? 'max-w-2xl mx-auto w-full' : ''}`}>
                 {comparisonRanking.map(({ label, result, tone }) => {
                   const toneClasses = {
                     emerald: 'border-emerald-200 bg-emerald-50/70 text-emerald-700',
@@ -2312,9 +2320,9 @@ export const UnifiedSortingDashboard: React.FC = () => {
                     rose: 'border-rose-200 bg-rose-50/70 text-rose-700',
                   }[tone];
                   return (
-                    <div key={`${label}-${result.id}`} className={`rounded-xl border p-3 ${toneClasses}`}>
+                    <div key={`${label}-${result.id}`} className={`rounded-xl border p-3 text-center ${toneClasses}`}>
                       <div className="text-[10px] font-bold uppercase tracking-[0.16em]">{label} result</div>
-                      <div className="mt-1 flex items-center gap-2">
+                      <div className="mt-1 flex items-center justify-center gap-2">
                         <span className="h-2 w-2 rounded-full" style={{ backgroundColor: result.color }} />
                         <span className="truncate text-xs font-bold text-slate-900">{result.name}</span>
                       </div>
@@ -2328,7 +2336,7 @@ export const UnifiedSortingDashboard: React.FC = () => {
             )}
 
             {/* Selected algorithm comparison chart */}
-            <div className="h-[280px] w-full pt-1">
+            <div className={`w-full pt-1 ${categoryFilter === 'compare' ? 'h-[320px] sm:h-[380px]' : 'h-[280px]'}`}>
               {categoryFilter === 'compare' ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={comparisonCurveData} margin={{ top: 15, right: 15, left: -10, bottom: 10 }}>
