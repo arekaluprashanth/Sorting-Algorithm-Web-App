@@ -612,33 +612,43 @@ const MemoizedChatMessageItem = memo(
 );
 
 const getInitialBounds = () => {
-  if (typeof window === 'undefined') return { x: 50, y: 70, width: 620, height: 700 };
+  if (typeof window === 'undefined') return { x: 50, y: 70, width: 880, height: 760 };
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (w < 640) {
     const width = Math.max(300, w - 20);
-    const height = Math.max(420, h - 80);
+    const height = Math.max(460, h - 70);
     return {
       x: Math.max(10, Math.round((w - width) / 2)),
-      y: Math.max(50, Math.round((h - height) / 2)),
+      y: Math.max(45, Math.round((h - height) / 2)),
       width,
       height,
     };
   } else if (w < 1024) {
-    const width = Math.min(580, w - 30);
-    const height = Math.min(680, h - 80);
+    const width = Math.min(720, w - 40);
+    const height = Math.min(720, h - 80);
     return {
       x: Math.max(15, Math.round((w - width) / 2)),
-      y: Math.max(60, Math.round((h - height) / 2)),
+      y: Math.max(50, Math.round((h - height) / 2)),
+      width,
+      height,
+    };
+  } else if (w < 1440) {
+    const width = Math.min(880, w - 80);
+    const height = Math.min(780, h - 90);
+    return {
+      x: Math.max(20, Math.round((w - width) / 2)),
+      y: Math.max(50, Math.round((h - height) / 2)),
       width,
       height,
     };
   } else {
-    const width = 640;
-    const height = Math.min(720, h - 90);
+    // Large screens / desktops
+    const width = Math.min(960, w - 120);
+    const height = Math.min(820, h - 100);
     return {
       x: Math.max(20, Math.round((w - width) / 2)),
-      y: Math.max(60, Math.round((h - height) / 2)),
+      y: Math.max(50, Math.round((h - height) / 2)),
       width,
       height,
     };
