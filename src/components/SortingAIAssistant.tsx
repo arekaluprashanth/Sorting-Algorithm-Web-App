@@ -1696,61 +1696,64 @@ export const SortingAIAssistant: React.FC = () => {
               )}
 
               {/* Input Area */}
-              <div className="p-3 sm:p-4 neu-surface border-t border-slate-200/40 shrink-0">
+              <div className="p-3 sm:p-4 neu-surface border-t border-slate-200/50 shrink-0">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleSendMessage();
                   }}
-                  className="flex items-end gap-2"
+                  className="neu-input rounded-2xl p-2 sm:p-2.5 flex items-end gap-2"
                 >
-                  <div className="relative flex-1">
-                    <textarea
-                      ref={textareaRef}
-                      value={inputPrompt}
-                      onChange={handleInputChange}
-                      onKeyDown={handleKeyDown}
-                      placeholder="Ask anything..."
-                      rows={1}
-                      className="neu-input w-full resize-none rounded-2xl px-4 py-3 pr-10 text-xs sm:text-sm text-[#202532] placeholder:text-[#aab1c0] focus:outline-none max-h-32 leading-relaxed"
-                    />
+                  <textarea
+                    ref={textareaRef}
+                    value={inputPrompt}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask anything..."
+                    rows={1}
+                    className="flex-1 bg-transparent border-0 resize-none px-2 py-1.5 text-xs sm:text-sm text-[#202532] placeholder:text-[#aab1c0] focus:outline-none max-h-32 leading-relaxed"
+                  />
 
+                  <div className="flex items-center gap-1.5 shrink-0 mb-0.5">
+                    {/* Voice Input Button */}
                     {voiceSupported && (
                       <button
                         type="button"
                         onClick={toggleVoiceInput}
-                        title={isListening ? 'Stop recording voice' : 'Dictate with voice'}
-                        className={`absolute right-2.5 bottom-2.5 p-1 rounded-xl transition-colors cursor-pointer ${
+                        title={isListening ? 'Stop recording voice' : 'Voice input'}
+                        aria-label={isListening ? 'Stop voice input' : 'Voice input'}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                           isListening
-                            ? 'bg-rose-500 text-white animate-pulse shadow-xs'
-                            : 'text-[#687080] hover:text-indigo-600'
+                            ? 'bg-rose-500 text-white animate-pulse shadow-md ring-2 ring-rose-300'
+                            : 'neu-control text-[#687080] hover:text-indigo-600'
                         }`}
                       >
                         <Mic className="w-4 h-4" />
                       </button>
                     )}
-                  </div>
 
-                  {isGenerating ? (
-                    <button
-                      type="button"
-                      onClick={handleStopGeneration}
-                      title="Stop generation"
-                      aria-label="Stop generation"
-                      className="neu-control inline-flex h-11 w-11 items-center justify-center rounded-2xl text-[#687080] hover:text-slate-800 shrink-0 cursor-pointer"
-                    >
-                      <Square className="w-4 h-4 fill-[#687080]" />
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={!inputPrompt.trim()}
-                      aria-label="Send message"
-                      className="neu-control inline-flex h-11 w-11 items-center justify-center rounded-2xl text-indigo-600 transition-all disabled:opacity-35 disabled:cursor-not-allowed shrink-0 cursor-pointer"
-                    >
-                      <Send className="w-4 h-4" />
-                    </button>
-                  )}
+                    {/* Send / Stop Button */}
+                    {isGenerating ? (
+                      <button
+                        type="button"
+                        onClick={handleStopGeneration}
+                        title="Stop generation"
+                        aria-label="Stop generation"
+                        className="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:bg-slate-900 transition-all cursor-pointer shadow-xs"
+                      >
+                        <Square className="w-3.5 h-3.5 fill-current" />
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        disabled={!inputPrompt.trim()}
+                        aria-label="Send message"
+                        className="w-9 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all cursor-pointer shadow-xs"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </form>
               </div>
             </div>
