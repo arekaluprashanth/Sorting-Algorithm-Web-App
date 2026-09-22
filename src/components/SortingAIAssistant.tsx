@@ -835,69 +835,124 @@ export const SortingAIAssistant: React.FC = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const recognitionRef = useRef<any>(null);
   const [isListening, setIsListening] = useState<boolean>(false);
-  const [voiceSupported, setVoiceSupported] = useState<boolean>(false);
+  const [voiceSupported, setVoiceSupported] = useState<boolean>(true);
+
+  // Helper to resolve SpeechRecognition cross-browser (Chrome, Safari/WebKit, Edge, Android/iOS)
+  const getSpeechRecognitionClass = () => {
+    if (typeof window === 'undefined') return null;
+    return (
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition ||
+      (window as any).mozSpeechRecognition ||
+      (window as any).msSpeechRecognition ||
+      null
+    );
+  };
 
   // Detect Web Speech API support once on mount
   useEffect(() => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    setVoiceSupported(Boolean(SpeechRecognition));
+    setVoiceSupported(Boolean(getSpeechRecognitionClass()));
   }, []);
 
-  // Toggle voice dictation (ChatGPT-style voice input)
-  const toggleVoiceInput = () => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+  // Enhanced cross-device voice recognition (Mobile & Desktop)
+  const toggleVoiceInput = async () => {
+    const SpeechRecognitionClass = getSpeechRecognitionClass();
+    if (!SpeechRecognitionClass) {
+      setErrorMessage('Voice recognition is not supported on this browser. Try Chrome or Safari.');
+      return;
+    }
 
     if (isListening) {
-      recognitionRef.current?.stop();
+      try {
+        recognitionRef.current?.stop();
+      } catch {
+        // ignore
+      }
       setIsListening(false);
       return;
     }
 
-    try {
-      const recognition = new SpeechRecognition();
-      // Single focused utterance: captures just the one voice speaking now
-      recognition.continuous = false;
-      // Only commit finalized results to avoid garbled/interim retyping
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      recognition.lang = 'en-US';
+    // Explicitly request microphone permission first if mediaDevices is available (essential for iOS Safari & Android Chrome)
+    if (navigator?.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+      } catch (err: any) {
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          setErrorMessage('Microphone access denied. Please allow microphone permissions in your browser settings.');
+          setIsListening(false);
+          return;
+        }
+      }
+    }
 
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
+    try {
+      const recognition = new SpeechRecognitionClass();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      // Use device locale or default to en-US
+      const userLang =
+        typeof navigator !== 'undefined'
+          ? navigator.language || (navigator as any).userLanguage || 'en-US'
+          : 'en-US';
+      recognition.lang = userLang;
+
+      let initialPrompt = inputPrompt;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setErrorMessage(null);
+        initialPrompt = inputPrompt;
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+        recognitionRef.current = null;
+      };
+
       recognition.onerror = (event: any) => {
-        // Ignore "no-speech"/"aborted" — just silently reset the mic state
-        if (event?.error && event.error !== 'aborted' && event.error !== 'no-speech') {
-          setIsListening(false);
-        } else {
-          setIsListening(false);
+        setIsListening(false);
+        recognitionRef.current = null;
+        if (event?.error === 'not-allowed' || event?.error === 'service-not-allowed') {
+          setErrorMessage('Microphone permission blocked. Please allow microphone in your browser settings.');
+        } else if (event?.error === 'audio-capture') {
+          setErrorMessage('No microphone was found on your device.');
+        } else if (event?.error === 'network') {
+          setErrorMessage('Voice recognition requires an internet connection.');
         }
       };
+
       recognition.onresult = (event: any) => {
-        let transcript = '';
+        let interimTranscript = '';
+        let finalTranscript = '';
+
         for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
+          const text = result[0]?.transcript || '';
           if (result.isFinal) {
-            transcript += result[0].transcript;
+            finalTranscript += text;
+          } else {
+            interimTranscript += text;
           }
         }
-        const finalText = transcript.trim();
-        if (!finalText) return;
-        // Replace the current input instead of appending duplicates,
-        // so the typed text is exactly what was spoken
-        setInputPrompt((prev) => {
-          const base = prev.trim();
-          // If the user already typed something, combine; otherwise replace
-          return base ? `${base} ${finalText}` : finalText;
-        });
+
+        const speechText = (finalTranscript || interimTranscript).trim();
+        if (speechText) {
+          setInputPrompt(() => {
+            const base = initialPrompt.trim();
+            return base ? `${base} ${speechText}` : speechText;
+          });
+        }
       };
 
       recognitionRef.current = recognition;
       recognition.start();
     } catch {
       setIsListening(false);
+      recognitionRef.current = null;
+      setErrorMessage('Could not initialize microphone. Please check permissions.');
     }
   };
 
@@ -1702,14 +1757,16 @@ export const SortingAIAssistant: React.FC = () => {
                     e.preventDefault();
                     handleSendMessage();
                   }}
-                  className="neu-input rounded-2xl p-2 sm:p-2.5 flex items-end gap-2"
+                  className={`neu-input rounded-2xl p-2 sm:p-2.5 flex items-end gap-2 transition-all ${
+                    isListening ? 'ring-2 ring-rose-400 bg-rose-50/20' : ''
+                  }`}
                 >
                   <textarea
                     ref={textareaRef}
                     value={inputPrompt}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask anything..."
+                    placeholder={isListening ? "🎙️ Listening... speak now" : "Ask anything..."}
                     rows={1}
                     className="flex-1 bg-transparent border-0 resize-none px-2 py-1.5 text-xs sm:text-sm text-[#202532] placeholder:text-[#aab1c0] focus:outline-none max-h-32 leading-relaxed"
                   />
