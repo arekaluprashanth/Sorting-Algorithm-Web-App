@@ -1650,35 +1650,6 @@ export const SortingAIAssistant: React.FC = () => {
                   />
                 ))}
 
-                {/* Quick Interactive Prompt Suggestions */}
-                {messages.length <= 1 && (
-                  <div className="pt-2 space-y-2">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#687080]">
-                      Suggested questions for {algoName}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {[
-                        `How does ${algoName} work step-by-step?`,
-                        `Why is ${algoName} best/worst case different?`,
-                        `Explain the time & space complexity of ${algoName}`,
-                        `When should I use ${algoName} in production?`,
-                      ].map((prompt, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => handleSendMessage(prompt)}
-                          className="neu-chip p-2.5 text-left text-xs text-[#202532] hover:text-indigo-900 transition-colors flex items-center justify-between gap-2 cursor-pointer group"
-                        >
-                          <span className="line-clamp-2">{prompt}</span>
-                          <span className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                            →
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 <div ref={messagesEndRef} />
               </div>
 
@@ -1714,7 +1685,7 @@ export const SortingAIAssistant: React.FC = () => {
                       value={inputPrompt}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
-                      placeholder={`Ask anything about ${algoName}... (Shift+Enter for new line)`}
+                      placeholder="Ask anything..."
                       rows={1}
                       className="neu-input w-full resize-none rounded-2xl px-4 py-3 pr-10 text-xs sm:text-sm text-[#202532] placeholder:text-[#aab1c0] focus:outline-none max-h-32 leading-relaxed"
                     />
