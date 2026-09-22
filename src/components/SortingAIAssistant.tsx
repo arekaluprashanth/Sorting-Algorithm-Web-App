@@ -21,15 +21,7 @@ import {
   RotateCcw,
   Pencil,
   Mic,
-  GripHorizontal,
-  Move,
-  Eye,
   Minus,
-  Scaling,
-  Columns,
-  Smartphone,
-  Monitor,
-  Maximize,
 } from 'lucide-react';
 import { useVisualizerContext } from '../context/VisualizerContext';
 import { streamAIChat, ChatHistoryItem } from '../services/aiService';
@@ -672,15 +664,13 @@ export const SortingAIAssistant: React.FC = () => {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Floating Window Pos, Size, Crop Ratio, Minimization, & Glass Transparency
+  // Floating Window Pos, Size & Minimization
   const [windowPos, setWindowPos] = useState<{ x: number; y: number }>(() => getInitialBounds());
   const [windowSize, setWindowSize] = useState<{ width: number; height: number }>(() => ({
     width: getInitialBounds().width,
     height: getInitialBounds().height,
   }));
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
-  const [transparencyMode, setTransparencyMode] = useState<'solid' | 'translucent' | 'glass'>('translucent');
-  const [showCropMenu, setShowCropMenu] = useState<boolean>(false);
 
   // Keep window in bounds on window resize
   useEffect(() => {
@@ -749,7 +739,7 @@ export const SortingAIAssistant: React.FC = () => {
     window.addEventListener('pointerup', onPointerUp);
   };
 
-  // Pointer-based Window Resizing (Crop ratio / custom dimensions)
+  // Pointer-based Window Resizing
   const handleResizeStart = (direction: string, e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -804,52 +794,6 @@ export const SortingAIAssistant: React.FC = () => {
 
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
-  };
-
-  // Crop Ratio / Aspect Ratio presets
-  const applyCropPreset = (preset: 'compact' | 'standard' | 'wide' | 'tall' | 'reset') => {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-
-    let targetW = 560;
-    let targetH = 680;
-
-    if (preset === 'compact') {
-      targetW = Math.min(380, w - 20);
-      targetH = Math.min(520, h - 80);
-    } else if (preset === 'standard') {
-      targetW = Math.min(560, w - 20);
-      targetH = Math.min(700, h - 80);
-    } else if (preset === 'wide') {
-      targetW = Math.min(840, w - 20);
-      targetH = Math.min(700, h - 80);
-    } else if (preset === 'tall') {
-      targetW = Math.min(460, w - 20);
-      targetH = Math.max(380, h - 90);
-    } else if (preset === 'reset') {
-      const defaults = getInitialBounds();
-      targetW = defaults.width;
-      targetH = defaults.height;
-      setWindowPos({ x: defaults.x, y: defaults.y });
-    }
-
-    setWindowSize({ width: targetW, height: targetH });
-    setIsExpanded(false);
-    setIsMinimized(false);
-    setShowCropMenu(false);
-
-    setWindowPos((prev) => ({
-      x: Math.min(Math.max(10, prev.x), Math.max(10, w - targetW - 10)),
-      y: Math.min(Math.max(10, prev.y), Math.max(10, h - targetH - 10)),
-    }));
-  };
-
-  const cycleTransparency = () => {
-    setTransparencyMode((curr) => {
-      if (curr === 'solid') return 'translucent';
-      if (curr === 'translucent') return 'glass';
-      return 'solid';
-    });
   };
 
   // Mark this user as visited so old chats are only cleared on their first ever open
@@ -1476,13 +1420,7 @@ export const SortingAIAssistant: React.FC = () => {
                         height: `${windowSize.height}px`,
                       }
                 }
-                className={`pointer-events-auto absolute flex flex-row overflow-hidden select-text ${
-                  transparencyMode === 'glass'
-                    ? 'neu-panel-glass'
-                    : transparencyMode === 'translucent'
-                    ? 'neu-panel-translucent'
-                    : 'neu-panel'
-                }`}
+                className="pointer-events-auto absolute flex flex-row overflow-hidden select-text neu-panel"
               >
             {/* 1. LEFT VERTICAL SIDEBAR */}
             <div
@@ -1634,16 +1572,6 @@ export const SortingAIAssistant: React.FC = () => {
                     </button>
                   )}
 
-                  {/* Move Grip Handle Indicator */}
-                  <div
-                    onPointerDown={handleDragStart}
-                    className="p-1 px-1.5 rounded-lg bg-slate-200/60 hover:bg-slate-300/80 text-slate-600 text-[10px] font-bold flex items-center gap-1 cursor-grab active:cursor-grabbing border border-slate-300/50 shadow-2xs"
-                    title="Click & Drag to move window"
-                  >
-                    <GripHorizontal className="w-3.5 h-3.5 text-slate-600" />
-                    <span className="hidden md:inline">Move</span>
-                  </div>
-
                   {/* AI Assistant Avatar */}
                   <div className="neu-avatar-sm w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-indigo-600 shrink-0">
                     <AIAssistantLogo className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-indigo-600" />
@@ -1656,112 +1584,14 @@ export const SortingAIAssistant: React.FC = () => {
                       </h3>
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline-block" />
                     </div>
-                    <p className="text-[10px] sm:text-[11px] text-[#687080] truncate max-w-[140px] sm:max-w-[200px]">
+                    <p className="text-[10px] sm:text-[11px] text-[#687080] truncate max-w-[150px] sm:max-w-[220px]">
                       {activeSession.title !== 'New Conversation' ? activeSession.title : 'AI sorting assistant'}
                     </p>
                   </div>
                 </div>
 
-                {/* Header Window Actions (Crop Ratio, Glass Opacity, Minimize, Maximize, Close) */}
-                <div className="flex items-center gap-1 sm:gap-1.5 text-slate-500 relative">
-                  {/* Crop / Aspect Ratio Preset Menu */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowCropMenu((p) => !p)}
-                      title="Adjust window crop ratio / layout presets"
-                      aria-label="Adjust window crop ratio"
-                      className={`neu-control p-1.5 transition-colors cursor-pointer ${
-                        showCropMenu ? 'text-indigo-600 ring-1 ring-indigo-400' : 'text-[#687080] hover:text-slate-800'
-                      }`}
-                    >
-                      <Scaling className="w-3.5 h-3.5" />
-                    </button>
-
-                    {showCropMenu && (
-                      <div
-                        data-no-drag="true"
-                        className="absolute right-0 top-full mt-2 w-48 rounded-2xl bg-white/95 border border-slate-200 shadow-2xl p-1.5 z-50 space-y-1 text-slate-700 backdrop-blur-md"
-                      >
-                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 flex items-center justify-between">
-                          <span>Crop Ratio Presets</span>
-                          <Scaling className="w-3 h-3 text-slate-400" />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => applyCropPreset('compact')}
-                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-indigo-50 hover:text-indigo-900 flex items-center gap-2 cursor-pointer transition-colors"
-                        >
-                          <Smartphone className="w-3.5 h-3.5 text-indigo-600" />
-                          <div>
-                            <div className="font-semibold">Compact (Mobile)</div>
-                            <div className="text-[10px] text-slate-400">380 × 520 px</div>
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => applyCropPreset('standard')}
-                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-indigo-50 hover:text-indigo-900 flex items-center gap-2 cursor-pointer transition-colors"
-                        >
-                          <Columns className="w-3.5 h-3.5 text-emerald-600" />
-                          <div>
-                            <div className="font-semibold">Split View</div>
-                            <div className="text-[10px] text-slate-400">560 × 700 px</div>
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => applyCropPreset('wide')}
-                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-indigo-50 hover:text-indigo-900 flex items-center gap-2 cursor-pointer transition-colors"
-                        >
-                          <Monitor className="w-3.5 h-3.5 text-amber-600" />
-                          <div>
-                            <div className="font-semibold">Wide Studio</div>
-                            <div className="text-[10px] text-slate-400">840 × 700 px</div>
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => applyCropPreset('tall')}
-                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-indigo-50 hover:text-indigo-900 flex items-center gap-2 cursor-pointer transition-colors"
-                        >
-                          <PanelLeft className="w-3.5 h-3.5 text-purple-600" />
-                          <div>
-                            <div className="font-semibold">Tall Sidebar</div>
-                            <div className="text-[10px] text-slate-400">460 × Full Height</div>
-                          </div>
-                        </button>
-                        <div className="border-t border-slate-100 pt-1">
-                          <button
-                            type="button"
-                            onClick={() => applyCropPreset('reset')}
-                            className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs hover:bg-slate-100 flex items-center gap-2 text-slate-600 cursor-pointer transition-colors"
-                          >
-                            <RotateCcw className="w-3 h-3 text-slate-500" />
-                            <span>Reset to Default</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Glass Transparency Toggle (Solid -> Translucent -> Glass) */}
-                  <button
-                    type="button"
-                    onClick={cycleTransparency}
-                    title={`Transparency mode: ${transparencyMode} (Click to change: Solid / Translucent / Glass)`}
-                    aria-label="Toggle Glass Transparency"
-                    className={`neu-control p-1.5 transition-colors cursor-pointer ${
-                      transparencyMode === 'glass'
-                        ? 'text-indigo-600 ring-1 ring-indigo-400'
-                        : transparencyMode === 'translucent'
-                        ? 'text-emerald-600'
-                        : 'text-[#687080] hover:text-slate-800'
-                    }`}
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                  </button>
-
+                {/* Header Window Actions: Clear chat, Minimize, Maximize/Restore, Close */}
+                <div className="flex items-center gap-1 sm:gap-1.5 text-slate-500">
                   {/* Clear conversation */}
                   <button
                     type="button"
